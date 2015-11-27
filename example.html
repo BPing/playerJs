@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>video canvas player</title>
+    <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
+    <style type="text/css">
+        * {
+            margin: 0px;
+            padding: 0px;
+        }
+    </style>
+</head>
+
+<body>
+
+<a href="javascript:void(0);" id="videoOpen" class="videoOpen" flag_id="167801323">打开回放</a><br/>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(".videoOpen").click(function () {
+            if (!$("#videoWin").is("div")) {
+                var videoUrl = 'video.html';
+                $('body').append("<div id='videoShade'><a href='javascript:void(0);' id='videoClose'>关闭</a></div>");
+                $('body').append("<div id='videoWin'><iframe width='100%' height='100%' scrolling='no' frameborder=0  src='" + videoUrl + "' ></iframe></div>");
+                //设置遮罩样式
+                $("#videoShade").css({
+                    position: "absolute",
+                    "background-color": "black",
+                    opacity: '0.5',
+                    width: $(window).width(),
+                    height: $(window).height(),
+                    "z-index": 10,
+                    top: 0
+                });
+                //设置close样式
+                $("#videoClose").css({position: "absolute", "right": "20px", "top": "10px", "color": "white"});
+                //设置videoWin 样式
+                var width = $(window).width() * 0.8;
+                var height = (width * 768) / 1280;
+                var left = ($(window).width() - width) / 2;
+                var top = ($(window).height() - height) / 2;
+                $("#videoWin").css({
+                    left: left,
+                    top: top,
+                    width: width,
+                    height: height,
+                    "z-index": 11,
+                    position: "absolute"
+                });
+                //
+                $("#videoClose").click(function () {
+                    $("#videoWin").remove();
+                    $("#videoShade").remove();
+                });
+            }
+        });
+    });
+</script>
+</body>
+</html>
