@@ -108,7 +108,8 @@ var vcppt = vcp.prototype;
  */
 vcppt.handletime = function (time) {
     if (typeof time == 'undefined') return;
-    this.nowTp = this.nowTp + (time - this.lastftp);
+    if (time > this.lastftp) //校正时间
+        this.nowTp = this.nowTp + (time - this.lastftp);
     this.lastftp = time;
     util.log("lastftp:" + time + " nowTp:" + this.nowTp);
 };
@@ -165,16 +166,7 @@ vcppt.playback = function (time) {
  * @param time
  */
 vcppt.playing = function (time) {
-
     var vcpHandle = this;
-
-    //点击播放
-    if (time && time == 0 && !vcdpr.isEnd()) {
-        window.requestNextAnimationFrame(function (time) {
-            vcpHandle.playing(time)
-        });
-        return;
-    }
 
     if (vcpHandle.playback(time)) {
         window.requestNextAnimationFrame(function (time) {
@@ -183,6 +175,7 @@ vcppt.playing = function (time) {
     } else {
         if (vcdpr.isEnd() && this.nowTp >= vcdpr.getDuration()) { //视频播放结束
             this.notifyUI(this.UI.VIDEO_END);
+            return;
         }
     }
 };
@@ -198,7 +191,6 @@ vcppt.onPause = function () {
 
 /**
  *  播放
- *
  */
 vcppt.onPlay = function () {
     this.pause = false;
@@ -206,7 +198,7 @@ vcppt.onPlay = function () {
     this.videoDuration = vcdpr.getDuration();
     if (this.lastPauseTp != 0)
         this.lastftp = this.lastftp + (this.lastPlayTp - this.lastPauseTp);
-    this.playing(0);
+    this.playing(this.nowTp);
     this.notifyUI(this.UI.VIDEO_PLAY);
 };
 

@@ -94,14 +94,25 @@
         if (act == myUI.VIDEO_FRAME) {
             timeUpdateShow(ctx.nowTp, ctx.videoDuration);
             setProcessWidth(ctx.videoDuration <= 0 ? 0 : (ctx.nowTp / ctx.videoDuration) * 100);
+            util.log("VIDEO_FRAME lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
         if (act == myUI.VIDEO_END) {
             timeUpdateShow(ctx.videoDuration, ctx.videoDuration);
             setProcessWidth(100);
+            pauseDraw();
             showOverMsg();
+            util.log("VIDEO_END lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
         if (act == myUI.VIDEO_RESET) {
             timeUpdateShow(ctx.videoDuration, ctx.videoDuration);
+            util.log("VIDEO_RESET  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+        if (act == myUI.VIDEO_PLAY) {
+            util.log("VIDEO_PLAY  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+
+        if (act == myUI.VIDEO_PAUSE) {
+            util.log("VIDEO_PAUSE  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
     };
 
@@ -109,7 +120,7 @@
     $("." + playPauseName).bind("click", function (e) {
         e.preventDefault();
         playPauseClick();
-        return false;
+        return true;
     });
 
     $("#" + progressBtnName).bind("mousedown", function (e) {
@@ -122,6 +133,8 @@
     $("#" + progressBtnName).bind("mousemove", function (e) {
         e.preventDefault();
         if (btnMouseDown != 1) return false;
+
+        pauseDraw();
 
         var pageX = e.pageX;
         var progressOffsetX = $('#' + progressName).offset().left;
@@ -139,8 +152,7 @@
         $("#" + progressName).css({width: progresswidth + "%"});
         $("#" + progressBtnName).css({left: progressBtnwidth + "%"});
 
-        //   myplayer.timePoint();
-
+        myplayer.timePoint(progresswidth);
 
         return false;
     });
