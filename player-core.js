@@ -71,6 +71,7 @@ vcpUI.prototype = {
     VIDEO_PAUSE: 2,
     VIDEO_END: 3,
     VIDEO_FRAME: 4,
+    VIDEO_RESET: 5,
     notifyUI: function (action, context) {
         console.log("action：" + action);
     }
@@ -164,10 +165,11 @@ vcppt.playback = function (time) {
  * @param time
  */
 vcppt.playing = function (time) {
+
     var vcpHandle = this;
 
     //点击播放
-    if (time && time == 0) {
+    if (time && time == 0 && !vcdpr.isEnd()) {
         window.requestNextAnimationFrame(function (time) {
             vcpHandle.playing(time)
         });
@@ -207,6 +209,22 @@ vcppt.onPlay = function () {
     this.playing(0);
     this.notifyUI(this.UI.VIDEO_PLAY);
 };
+
+/**
+ * 重置时间点
+ *   从某一时间点继续播放
+ * @param tp 0-100 总的时长百分比
+ */
+vcppt.timePoint = function (tp) {
+    if (typeof tp == 'number' && (tp >= 0 && tp <= 100)) {
+        this.nowTp = tp * vcdpr.getDuration() / 100;
+        vcdpr.resetLastIndex(0);
+        this.videoCanvas.clearCanvas();
+        this.notifyUI(this.UI.VIDEO_RESET);
+    }
+    util.log("timePoint:" + tp);
+};
+
 
 /**
  * 重置
@@ -281,6 +299,13 @@ vcdpr.getDuration = function () {
 
 vcdpr.getScreen = function () {
     return vcdpr.JsonData.screenSize
+};
+
+vcdpr.resetLastIndex = function (i) {
+    vcdpr.lastIndex = 0;
+    if (typeof i == 'number' && i >= 0 && i <= vcdpr.JsonData.traceData.length) {
+        vcdpr.lastIndex = i;
+    }
 };
 
 /**
@@ -424,6 +449,10 @@ vcpt.penMove = function (x, y) {
 vcpt.viewMove = function (x, y, v) {
     if (v instanceof viewObj)
         v.moveTo(x, y);
+};
+
+vcpt.clearCanvas = function () {
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
 
 vcpt.drawImage = function () {

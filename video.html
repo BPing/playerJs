@@ -80,43 +80,10 @@
     var mainContainerName = "mainContainer";
     var progressPause = 0;
     var playerShowLock = 0;
+    var timeShowPause = 0;
+    var btnMouseDown = 0;
     var timePlayedName = "time_played";
     var timeDurationName = "time_duration";
-
-
-    //    var getPlayerHeight = function () {
-    //        return $("#" + playerName).height();
-    //    };
-    //
-    //    var setPlayerStyle = function (drawContainerName) {
-    //        var draContainer = $("#" + drawContainerName);
-    //        var top = Number(draContainer.position().top) + Number(draContainer.attr("height"));
-    //        var left = Number(draContainer.position().left);
-    //        var width = Number(draContainer.attr("width")) + 2;
-    //        $("#player").css({top: top, width: width, display: "block"});
-    //    };
-    //    var setDrawContainerWH = function () {
-    //        var h = $(window).height() - getPlayerHeight();
-    //        var w = ($(window).height() - getPlayerHeight()) * 1280 / 768;
-    //        h *= 1;
-    //        w *= 1;
-    //        $("#" + drawContainerName).attr("height", h);
-    //        $("#" + drawContainerName).attr("width", w);
-    //        $("#" + drawContainerName).css({'margin': '0 auto'});
-    //
-    //        //设置player style
-    //        setPlayerStyle(drawContainerName);
-    //        //设置main container 高
-    //        $("#" + mainContainerName).css({
-    //            height: (Number($("#" + drawContainerName).attr("height")) + Number(getPlayerHeight())),
-    //            width: $("#" + drawContainerName).attr("width"),
-    //            'margin': '0 auto'
-    //        });
-    ////		$("#"+mainContainerName).attr("height",eval(Number($("#"+drawContainerName).attr("height"))+Number(drawPlayer.getPlayerHeight()))+"px");
-    //    };
-    //
-    //
-    //    setDrawContainerWH();
 
     $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
 
@@ -133,14 +100,73 @@
             setProcessWidth(100);
             showOverMsg();
         }
+        if (act == myUI.VIDEO_RESET) {
+            timeUpdateShow(ctx.videoDuration, ctx.videoDuration);
+        }
     };
 
+    //播放按钮点击事件
     $("." + playPauseName).bind("click", function (e) {
         e.preventDefault();
         playPauseClick();
         return false;
     });
 
+    $("#" + progressBtnName).bind("mousedown", function (e) {
+        e.preventDefault();
+        btnMouseDown = 1;
+        setProcessLock();
+        setTimeShowLock();
+        return false;
+    });
+    $("#" + progressBtnName).bind("mousemove", function (e) {
+        e.preventDefault();
+        if (btnMouseDown != 1) return false;
+
+        var pageX = e.pageX;
+        var progressOffsetX = $('#' + progressName).offset().left;
+        var progressBtnOffsetX = $('#' + progressBtnName).parent().offset().left;
+        var progressTotalW = $('#' + progressName).parent().width();
+        var progressBtnTotalW = $('#' + progressBtnName).parent().width();
+
+        var progresswidth = eval(((pageX - progressOffsetX) / progressTotalW) * 100);
+        progresswidth = boundary(parseFloat(progresswidth));
+
+        processBtnLeftNum = (pageX - progressBtnOffsetX) / progressBtnTotalW;
+        var progressBtnwidth = eval(processBtnLeftNum * 100);
+        progressBtnwidth = boundary(parseFloat(progressBtnwidth));
+
+        $("#" + progressName).css({width: progresswidth + "%"});
+        $("#" + progressBtnName).css({left: progressBtnwidth + "%"});
+
+        //   myplayer.timePoint();
+
+
+        return false;
+    });
+    $("#" + progressBtnName).bind("mouseout", function (e) {
+        btnMouseDown = 0;
+        setProcessUnLock();
+        setTimeShowUnLock();
+        return false;
+    });
+    $("#" + progressBtnName).bind("mouseup", function (e) {
+        btnMouseDown = 0;
+        setProcessUnLock();
+        setTimeShowUnLock();
+        return false;
+    });
+
+    /**
+     * 边缘值处理 0-100
+     */
+    var boundary = function (v) {
+        if (v < 0)
+            return 0;
+        if (v > 100)
+            return 100;
+        return v;
+    };
 
     //更新时间
     var timeUpdateShow = function (current, total) {
@@ -183,7 +209,20 @@
         progressPause = 0;
     };
 
+    //检查显示时间是否锁定
+    var checkTimeShowLocked = function () {
+        return timeShowPause;
+    };
 
+    //设置显示时间锁定
+    var setTimeShowLock = function () {
+        timeShowPause = 1;
+    };
+
+    //解锁显示时间
+    var setTimeShowUnLock = function () {
+        timeShowPause = 0;
+    };
     //显示为播放
     var showPlayBtn = function () {
         $("#" + pauseBtnName).hide();
@@ -241,6 +280,8 @@
         showPauseMsg();
         //播放按钮样式设置
         showPlayBtn();
+        //
+        //   setProcessLock();
         //发送 暂停 事件
         myplayer.onPause();
 
@@ -252,6 +293,8 @@
         hidePauseMsg();
         //播放按钮样式设置
         showPauseBtn();
+        //
+        //  setProcessUnLock();
         //发送 播放 事件
         myplayer.onPlay();
     };
