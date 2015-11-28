@@ -108,7 +108,7 @@ var vcppt = vcp.prototype;
  */
 vcppt.handletime = function (time) {
     if (typeof time == 'undefined') return;
-    if (time > this.lastftp) //校正时间
+    if (time > this.lastftp)
         this.nowTp = this.nowTp + (time - this.lastftp);
     this.lastftp = time;
     util.log("lastftp:" + time + " nowTp:" + this.nowTp);
@@ -120,7 +120,6 @@ vcppt.handletime = function (time) {
  * @returns {boolean}
  */
 vcppt.playback = function (time) {
-
     do {
         if (this.pause) return false;
 
@@ -166,11 +165,11 @@ vcppt.playback = function (time) {
  * @param time
  */
 vcppt.playing = function (time) {
+    time = +new Date();
     var vcpHandle = this;
-
     if (vcpHandle.playback(time)) {
-        window.requestNextAnimationFrame(function (time) {
-            vcpHandle.playing(time)
+        window.requestNextAnimationFrame(function (t) {
+            vcpHandle.playing(t)
         });
     } else {
         if (vcdpr.isEnd() && this.nowTp >= vcdpr.getDuration()) { //视频播放结束
@@ -194,10 +193,8 @@ vcppt.onPause = function () {
  */
 vcppt.onPlay = function () {
     this.pause = false;
-    this.lastPlayTp = +new Date();
+    this.lastftp = this.lastPlayTp = +new Date();
     this.videoDuration = vcdpr.getDuration();
-    if (this.lastPauseTp != 0)
-        this.lastftp = this.lastftp + (this.lastPlayTp - this.lastPauseTp);
     this.playing(this.nowTp);
     this.notifyUI(this.UI.VIDEO_PLAY);
 };
