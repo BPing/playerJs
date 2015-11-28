@@ -17,9 +17,114 @@
     var timePlayedName = "time_played";
     var timeDurationName = "time_duration";
 
-
     var myUI = new VideoCanvasPlayerUI();
     var myPlayer = new VideoCanvasPlayer({cw: 1080, ch: 648 * 8, vw: 1080, vh: 648, UI: myUI});
+
+    myUI.notifyUI = function (act, ctx) {
+        if (act == myUI.VIDEO_FRAME) {
+            timeShow.update(ctx.nowTp, ctx.videoDuration);
+            progress.setWidth(ctx.videoDuration <= 0 ? 0 : (ctx.nowTp / ctx.videoDuration) * 100);
+
+            util.log("VIDEO_FRAME lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+        if (act == myUI.VIDEO_END) {
+            timeShow.update(ctx.videoDuration, ctx.videoDuration);
+            progress.setWidth(100);
+            playPause.pauseDraw();
+            playPause.showOverMsg();
+
+            util.log("VIDEO_END lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+        if (act == myUI.VIDEO_RESET) {
+            var s = timeShow.isLocked();
+            timeShow.unLock();
+            timeShow.update(ctx.nowTp, ctx.videoDuration);
+            if (s)
+                timeShow.lock();
+
+            util.log("VIDEO_RESET  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+        if (act == myUI.VIDEO_PLAY) {
+
+            util.log("VIDEO_PLAY  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+
+        if (act == myUI.VIDEO_PAUSE) {
+
+            util.log("VIDEO_PAUSE  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+    };
+
+    var event = {
+
+        init: function () {
+
+            //播放按钮点击事件
+            $("." + playPauseName).bind("click", function (e) {
+                e.preventDefault();
+                if ($("#" + playBtnName).css("display") == "none") {
+                    playPause.pauseDraw();                //pause
+                    myplayer.onPause();
+                }
+                else if ($("#" + pauseBtnName).css("display") == "none") {
+                    playPause.playDraw();                //play
+                    myplayer.onPlay();
+                }
+                return true;
+            });
+
+            //进度条处理事件
+            $("#" + progressBtnName).bind("mousedown", function (e) {
+                e.preventDefault();
+                btnMouseDown = 1;
+                progress.lock();
+                timeShow.lock();
+
+                playPause.pauseDraw();                //pause
+                myplayer.onPause();
+
+                return false;
+            });
+            $("#" + progressBtnName).bind("mousemove", function (e) {
+                e.preventDefault();
+                if (btnMouseDown != 1) return false;
+
+                var pageX = e.pageX;
+                var progressOffsetX = $('#' + progressName).offset().left;
+                var progressBtnOffsetX = $('#' + progressBtnName).parent().offset().left;
+                var progressTotalW = $('#' + progressName).parent().width();
+                var progressBtnTotalW = $('#' + progressBtnName).parent().width();
+
+                var progresswidth = eval(((pageX - progressOffsetX) / progressTotalW) * 100);
+                progresswidth = util.boundary(parseFloat(progresswidth), 0, 100);
+
+                processBtnLeftNum = (pageX - progressBtnOffsetX) / progressBtnTotalW;
+                var progressBtnwidth = eval(processBtnLeftNum * 100);
+                progressBtnwidth = util.boundary(parseFloat(progressBtnwidth), 0, 100);
+
+                $("#" + progressName).css({width: progresswidth + "%"});
+                $("#" + progressBtnName).css({left: progressBtnwidth + "%"});
+
+                myplayer.timePoint(progresswidth);
+                return false;
+            });
+            $("#" + progressBtnName).bind("mouseout", function (e) {
+                btnMouseDown = 0;
+                progress.unLock();
+                timeShow.unLock();
+                return false;
+            });
+            $("#" + progressBtnName).bind("mouseup", function (e) {
+                btnMouseDown = 0;
+                progress.unLock();
+                timeShow.unLock();
+                return false;
+            });
+        }
+
+    };
+
+    event.init();
 
     /**
      * 进度条
@@ -51,6 +156,7 @@
         }
 
     };
+
     /**
      *  时间显示处理
      *
@@ -74,7 +180,7 @@
             timeShowLock = 0;
         },
 
-        show: function (current, total) {
+        update: function (current, total) {
             $("#" + timePlayedName).html(util.timeFormat(current));
             $("#" + timeDurationName).html(util.timeFormat(total));
         }
@@ -141,9 +247,6 @@
             this.showPauseMsg();
             //播放按钮样式设置
             this.showPlayBtn();
-            //发送 暂停 事件
-            myPlayer.onPause();
-
         },
 
         //播放
@@ -153,21 +256,7 @@
             //播放按钮样式设置
             this.showPauseBtn();
             //发送 播放 事件
-            myPlayer.onPlay();
-        },
-
-        //播放按钮点击处理
-        playPauseClick: function () {
-            //pause
-            if ($("#" + playBtnName).css("display") == "none") {
-                pauseDraw();
-            }
-            //play
-            else if ($("#" + pauseBtnName).css("display") == "none") {
-                playDraw();
-            }
-        },
-
+        }
     };
 
 })

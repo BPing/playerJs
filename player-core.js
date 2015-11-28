@@ -111,6 +111,7 @@ vcppt.handletime = function (time) {
     if (time > this.lastftp)
         this.nowTp = this.nowTp + (time - this.lastftp);
     this.lastftp = time;
+
     util.log("lastftp:" + time + " nowTp:" + this.nowTp);
 };
 
@@ -449,41 +450,6 @@ vcpt.drawImage = function () {
 };
 
 vcpt.notice = function (vc) {
-};
-
-/**
- * util 通用工具类
- *
- * @type {{}}
- */
-var util = {};
-
-util.logOn = true;
-
-util.mergeOptions = function (obj1, obj2) {
-    if (!obj2) {
-        return obj1;
-    }
-    for (var key in obj2) {
-        if (hasOwnProp.call(obj2, key)) {
-            obj1[key] = obj2[key];
-        }
-    }
-    return obj1;
-};
-
-util.each = function (obj, fn, context) {
-    for (var key in obj) {
-        if (hasOwnProp.call(obj, key)) {
-            fn.call(context || this, key, obj[key]);
-        }
-    }
-};
-
-util.log = function (msg) {
-    if (util.logOn) {
-        console.log(msg);
-    }
 };
 /**
  * 帧速率约为 60fps
