@@ -270,9 +270,10 @@ vcdpr.prototype = {
      */
     getJsonData: function () {
         var own = this;
-        $.ajax({
+        util.http.ajax({
             type: 'get',
             url: this.Url,
+            dataType: "json",
             success: function (d) {
                 if (typeof d != 'object')
                     d = JSON.parse(d);
