@@ -43,6 +43,12 @@ var vcp = function (o) {
         this.UI = vcp.options.UI;
     }
 
+    //数据处理器
+    this.vcdpr = new vcdpr();
+    this.vcdpr.Url = vcp.options.url;
+    this.vcdpr.vcp = this;
+    this.vcdpr.JsonData = JsonData;
+    this.vcdpr.loadOk = true;
 };
 
 /**
@@ -72,6 +78,8 @@ vcpUI.prototype = {
     VIDEO_END: 3,
     VIDEO_FRAME: 4,
     VIDEO_RESET: 5,
+    VIDEO_LOAD_DATA_SUCCESS: 6,
+    VIDEO_LOAD_DATA_FAILURE: 7,
     notifyUI: function (action, context) {
         console.log("action：" + action);
     }
@@ -91,6 +99,7 @@ vcp.options = {
 
     "FPS": 60, //帧速率，目前无效
     "UI": new vcpUI(), //默认UI处理对象
+    'url': '',//数据源
 };
 
 
@@ -126,13 +135,13 @@ vcppt.playback = function (time) {
 
         this.handletime(time);
 
-        var drawdate = vcdpr.getTimestampFromJson(this.nowTp);
+        var drawdate = this.vcdpr.getTimestampFromJson(this.nowTp);
 
-        if (drawdate === false && vcdpr.isEnd() && this.nowTp < vcdpr.getDuration()) break;
+        if (drawdate === false && this.vcdpr.isEnd() && this.nowTp < this.vcdpr.getDuration()) break;
 
         if (drawdate === false) return false;
 
-        var s = vcdpr.getScreen();
+        var s = this.vcdpr.getScreen();
 
         this.wr = this.view.W / s.w;
         this.hr = this.view.H / s.h;
@@ -173,7 +182,7 @@ vcppt.playing = function (time) {
             vcpHandle.playing(t)
         });
     } else {
-        if (vcdpr.isEnd() && this.nowTp >= vcdpr.getDuration()) { //视频播放结束
+        if (this.vcdpr.isEnd() && this.nowTp >= this.vcdpr.getDuration()) { //视频播放结束
             this.notifyUI(this.UI.VIDEO_END);
             return;
         }
@@ -193,9 +202,10 @@ vcppt.onPause = function () {
  *  播放
  */
 vcppt.onPlay = function () {
+    if (!this.isLoaded()) return; //数据未加载完成或加载失败。
     this.pause = false;
     this.lastftp = this.lastPlayTp = +new Date();
-    this.videoDuration = vcdpr.getDuration();
+    this.videoDuration = this.vcdpr.getDuration();
     this.playing(this.nowTp);
     this.notifyUI(this.UI.VIDEO_PLAY);
 };
@@ -207,25 +217,19 @@ vcppt.onPlay = function () {
  */
 vcppt.timePoint = function (tp) {
     if (typeof tp == 'number' && (tp >= 0 && tp <= 100)) {
-        this.nowTp = tp * vcdpr.getDuration() / 100;
-        vcdpr.resetLastIndex(0);
+        this.nowTp = tp * this.vcdpr.getDuration() / 100;
+        this.vcdpr.resetLastIndex(0);
         this.videoCanvas.clearCanvas();
         this.notifyUI(this.UI.VIDEO_RESET);
     }
     util.log("timePoint:" + tp);
 };
 
-
 /**
- * 重置
+ *
+ * @param action
+ * @param context
  */
-vcppt.onReset = function () {
-    this.lastPauseTp = 0;
-    this.lastPlayTp = 0;
-    this.lastftp = 0;
-    this.nowTp = 0;
-};
-
 vcppt.notifyUI = function (action, context) {
     if (typeof this.UI.notifyUI == 'function') {
         if (typeof context == 'undefined') context = this;
@@ -233,76 +237,95 @@ vcppt.notifyUI = function (action, context) {
     }
 };
 
+vcppt.isLoaded = function () {
+    return this.vcdpr.loadOk
+};
+
 
 /**
  * vcdpr 数据源处理
  */
-var vcdpr = {};
-
-//数据来源
-vcdpr.Url = '';
-
-/**
- * 播放的json数据
- * @type {{screenSize: {w: number, h: number}, version: number, traceData: *[], duration: number}}
- */
-vcdpr.JsonData = {screenSize: {w: 0, h: 0}, "traceData": [], "duration": 0};
-
-vcdpr.lastIndex = 0;
-
-vcdpr.loadOk = true;
-
-/**
- * 获取数据并转为相应的json数据，
- * 保存在 vcdpr.JsonData 变量中
- */
-vcdpr.getJsonData = function () {
+var vcdpr = function () {
+    this.Url = '';
+    this.JsonData = {screenSize: {w: 0, h: 0}, "traceData": [], "duration": 0};
+    this.loadOk = false; //数据是否加载完成
+    this.lastIndex = 0;
+    /** @type vcp */
+    this.vcp = null;
 };
 
-/**
- *
- * @param timestamp
- * @param flat
- */
-vcdpr.getTimestampFromJson = function (timestamp, flat) {
+vcdpr.prototype = {
 
-    var data = [];
-    if (!vcdpr.loadOk || vcdpr.lastIndex >= vcdpr.JsonData.traceData.length || timestamp > vcdpr.JsonData.duration) return false;
-    if (flat) {
-        return;
-    }
-    for (; vcdpr.lastIndex < vcdpr.JsonData.traceData.length
-           && vcdpr.JsonData.traceData[vcdpr.lastIndex].timestamp <= timestamp; vcdpr.lastIndex++) {
-        for (var i = 0; i <= vcdpr.JsonData.traceData[vcdpr.lastIndex].data.length; i++) {
-            if (vcdpr.JsonData.traceData[vcdpr.lastIndex].data[i])
-                data.push(vcdpr.JsonData.traceData[vcdpr.lastIndex].data[i]);
+    /**
+     * 获取数据并转为相应的json数据，
+     * 保存在 vcdpr.JsonData 变量中
+     */
+    getJsonData: function () {
+        $.ajax({
+            type: 'get',
+            url: this.Url,
+            data: {},
+            success: function (d) {
+                d = JSON.parse(d);
+                if (d.hasOwnProperty('reponseNo') && d.hasOwnProperty('videoData') && d.reponseNo == 0) {
+                    this.JsonData = d.videoData;
+                    this.loadOk = true;
+                    this.vcp.notifyUI(this.vcp.UI.VIDEO_LOAD_DATA_SUCCESS);
+                    return;
+                }
+                this.vcp.notifyUI(this.vcp.UI.VIDEO_LOAD_DATA_FAILURE);
+            },
+            error: function (d) {
+                util.log(d);
+                this.vcp.notifyUI(this.vcp.UI.VIDEO_LOAD_DATA_FAILURE);
+            }
+        });
+    },
+
+    /**
+     *
+     * @param timestamp
+     * @param flat
+     */
+    getTimestampFromJson: function (timestamp, flat) {
+        var data = [];
+        if (!this.loadOk || this.lastIndex >= this.JsonData.traceData.length || timestamp > this.JsonData.duration) return false;
+        if (flat) {
+            return;
+        }
+        for (; this.lastIndex < this.JsonData.traceData.length
+               && this.JsonData.traceData[this.lastIndex].timestamp <= timestamp; this.lastIndex++) {
+            for (var i = 0; i <= this.JsonData.traceData[this.lastIndex].data.length; i++) {
+                if (this.JsonData.traceData[this.lastIndex].data[i])
+                    data.push(this.JsonData.traceData[this.lastIndex].data[i]);
+            }
+
         }
 
+        return data;
+    },
+
+    getDuration: function () {
+        return this.JsonData.duration;
+    },
+
+    getScreen: function () {
+        return this.JsonData.screenSize
+    },
+
+    resetLastIndex: function (i) {
+        this.lastIndex = 0;
+        if (typeof i == 'number' && i >= 0 && i <= this.JsonData.traceData.length) {
+            this.lastIndex = i;
+        }
+    },
+
+    /**
+     * 是否已经播放了最后一条数据
+     */
+    isEnd: function () {
+        return this.lastIndex >= this.JsonData.traceData.length;
     }
-
-    return data;
-};
-
-vcdpr.getDuration = function () {
-    return vcdpr.JsonData.duration;
-};
-
-vcdpr.getScreen = function () {
-    return vcdpr.JsonData.screenSize
-};
-
-vcdpr.resetLastIndex = function (i) {
-    vcdpr.lastIndex = 0;
-    if (typeof i == 'number' && i >= 0 && i <= vcdpr.JsonData.traceData.length) {
-        vcdpr.lastIndex = i;
-    }
-};
-
-/**
- * 是否已经播放了最后一条数据
- */
-vcdpr.isEnd = function () {
-    return vcdpr.lastIndex >= vcdpr.JsonData.traceData.length;
 };
 
 ///**
@@ -537,7 +560,7 @@ window.requestNextAnimationFrame =
 
 
 //data stub
-vcdpr.JsonData = {
+var JsonData = {
     "screenSize": {
         "w": 150,
         "h": 100

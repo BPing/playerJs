@@ -9,15 +9,14 @@
     <script type="text/javascript" src="jquery-1.11.1.min.js"></script>
     <script type="text/javascript" src="player-core.js"></script>
     <script type="text/javascript" src="utilJs.js"></script>
-    <!--<script type="text/javascript" src="playJs.js"></script>-->
+    <script type="text/javascript" src="playJs.js"></script>
 </header>
 <link rel="stylesheet" href="./css/index.css"/>
 <body>
-<div id="mainContainer" style="height: 712px; width: 1080px; margin: 0px auto; background-color: white;">
-    <div id="drawContainer" width="1080" height="648"
+<div id="mainContainer" style="height: 664px; width: 1080px; margin: 0px auto; background-color: white;">
+    <div id="drawContainer" width="1080" height="600"
          style="border:1px solid #c3c3c3;margin:0 auto;background-color:white;">
         <div id="canvasDiv" style="display: block;">
-
         </div>
         <div class="pencil" id="pencil"></div>
         <div id="info" class="info">
@@ -29,7 +28,7 @@
     </div>
     <!--// <img id="parseLoading" src="./resource/loading.gif" style="position:absolute;z-index:110;left:540px;top:324px">-->
 
-    <div class="player" id="player" style="top: 648px; width: 1082px; display: block; margin-bottom: 0px;">
+    <div class="player" id="player" style="top: 600px; width: 1082px; display: block; margin-bottom: 0px;">
         <div class="scrubber" id="scrubber">
             <div id="progress" class="progress" style="width: 0%;"></div>
             <div id="loaded" class="loaded" style="width: 100%;"></div>
@@ -43,12 +42,6 @@
                 <li class="pause" id="pause" style="display: none;"><a href="#"></a></li>
                 <li class="warn"></li>
             </ul>
-            <!--<ul class="play-pause" id="play-pause">-->
-            <!--<li class="play" id="play" style="display: none;"><a href="#"></a></li>-->
-            <!--<li class="pause" id="pause" style="display: block;"><a href="#"></a></li>-->
-            <!--<li class="warn"></li>-->
-            <!--</ul>-->
-
             <ul class="volume-bar">
                 <li class="volume volume-on"><a href="#"></a></li>
                 <div class="volume-scrubber" id="volume-scrubber">
@@ -59,274 +52,15 @@
                 <em class="played" id="time_played">00:00</em>/<strong class="duration"
                                                                        id="time_duration">00:00</strong>
             </div>
-            <!--<form class="gotopage" id="gotopage">-->
-            <!--<input type="text" id="page-current" value="1" class="page-current"></input>/<span class="page-total"-->
-            <!--id="page-total">1</span>-->
-            <!--</form>-->
         </div>
         <div class="player-bg"></div>
     </div>
 </div>
 
-
-<script>
-    var drawContainerName = "drawContainer";
-    var canvasContainerName = "canvasDiv";
-    var progressName = "progress";
-    var progressBtnName = "progressBtn";
-    var playerName = "player";
-    var playPauseName = "play-pause";
-    var playBtnName = "play";
-    var pauseBtnName = "pause";
-    var infoName = "info";
-    var mainContainerName = "mainContainer";
-    var progressPause = 0;
-    var playerShowLock = 0;
-    var timeShowPause = 0;
-    var btnMouseDown = 0;
-    var timePlayedName = "time_played";
-    var timeDurationName = "time_duration";
-
-    $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
-
-    myUI = new VideoCanvasPlayerUI();
-    myplayer = new VideoCanvasPlayer({cw: 1080, ch: 648 * 8, vw: 1080, vh: 648, UI: myUI});
-
-    myUI.notifyUI = function (act, ctx) {
-        if (act == myUI.VIDEO_FRAME) {
-            timeUpdateShow(ctx.nowTp, ctx.videoDuration);
-            setProcessWidth(ctx.videoDuration <= 0 ? 0 : (ctx.nowTp / ctx.videoDuration) * 100);
-            util.log("VIDEO_FRAME lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
-        }
-        if (act == myUI.VIDEO_END) {
-            timeUpdateShow(ctx.videoDuration, ctx.videoDuration);
-            setProcessWidth(100);
-            pauseDraw();
-            showOverMsg();
-            util.log("VIDEO_END lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
-        }
-        if (act == myUI.VIDEO_RESET) {
-            timeUpdateShow(ctx.videoDuration, ctx.videoDuration);
-            util.log("VIDEO_RESET  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
-        }
-        if (act == myUI.VIDEO_PLAY) {
-            util.log("VIDEO_PLAY  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
-        }
-
-        if (act == myUI.VIDEO_PAUSE) {
-            util.log("VIDEO_PAUSE  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
-        }
-    };
-
-    //播放按钮点击事件
-    $("." + playPauseName).bind("click", function (e) {
-        e.preventDefault();
-        playPauseClick();
-        return true;
-    });
-
-    $("#" + progressBtnName).bind("mousedown", function (e) {
-        e.preventDefault();
-        btnMouseDown = 1;
-        setProcessLock();
-        setTimeShowLock();
-        return false;
-    });
-    $("#" + progressBtnName).bind("mousemove", function (e) {
-        e.preventDefault();
-        if (btnMouseDown != 1) return false;
-
-        pauseDraw();
-
-        var pageX = e.pageX;
-        var progressOffsetX = $('#' + progressName).offset().left;
-        var progressBtnOffsetX = $('#' + progressBtnName).parent().offset().left;
-        var progressTotalW = $('#' + progressName).parent().width();
-        var progressBtnTotalW = $('#' + progressBtnName).parent().width();
-
-        var progresswidth = eval(((pageX - progressOffsetX) / progressTotalW) * 100);
-        progresswidth = boundary(parseFloat(progresswidth));
-
-        processBtnLeftNum = (pageX - progressBtnOffsetX) / progressBtnTotalW;
-        var progressBtnwidth = eval(processBtnLeftNum * 100);
-        progressBtnwidth = boundary(parseFloat(progressBtnwidth));
-
-        $("#" + progressName).css({width: progresswidth + "%"});
-        $("#" + progressBtnName).css({left: progressBtnwidth + "%"});
-
-        myplayer.timePoint(progresswidth);
-
-        return false;
-    });
-    $("#" + progressBtnName).bind("mouseout", function (e) {
-        btnMouseDown = 0;
-        setProcessUnLock();
-        setTimeShowUnLock();
-
-        return false;
-    });
-    $("#" + progressBtnName).bind("mouseup", function (e) {
-        btnMouseDown = 0;
-        setProcessUnLock();
-        setTimeShowUnLock();
-        return false;
-    });
-
-    /**
-     * 边缘值处理 0-100
-     */
-    var boundary = function (v) {
-        if (v < 0)
-            return 0;
-        if (v > 100)
-            return 100;
-        return v;
-    };
-
-    //更新时间
-    var timeUpdateShow = function (current, total) {
-        current = timeFormat(current);
-        total = timeFormat(total);
-        $("#" + timePlayedName).html(current);
-        $("#" + timeDurationName).html(total);
-    };
-
-    //时间格式化
-    var timeFormat = function (timeStamp) {
-        var min = Math.floor((timeStamp / 1000) / 60);
-        var sec = Math.round(timeStamp / 1000) - min * 60;
-        if (sec < 10) {
-            sec = '0' + sec;
-        }
-        return min + ':' + sec;
-    };
-
-    //进度条位置设置
-    var setProcessWidth = function (width) {
-        if (!checkProcessLocked()) {
-            $("#" + progressName).css({width: width + '%'});
-            $("#" + progressBtnName).css({left: width + '%'});
-        }
-    };
-
-    //检查进度条是否锁定
-    var checkProcessLocked = function () {
-        return progressPause;
-    };
-
-    //设置进度条锁定
-    var setProcessLock = function () {
-        progressPause = 1;
-    };
-
-    //解锁进度条
-    var setProcessUnLock = function () {
-        progressPause = 0;
-    };
-
-    //检查显示时间是否锁定
-    var checkTimeShowLocked = function () {
-        return timeShowPause;
-    };
-
-    //设置显示时间锁定
-    var setTimeShowLock = function () {
-        timeShowPause = 1;
-    };
-
-    //解锁显示时间
-    var setTimeShowUnLock = function () {
-        timeShowPause = 0;
-    };
-    //显示为播放
-    var showPlayBtn = function () {
-        $("#" + pauseBtnName).hide();
-        $("#" + playBtnName).show();
-    };
-
-    //显示为暂停
-    var showPauseBtn = function () {
-        //不显示暂停动画
-        hidePauseMsg();
-
-        $("#" + playBtnName).hide();
-        $("#" + pauseBtnName).show();
-    };
-
-    //显示暂停消息
-    var showPauseMsg = function () {
-        $("#" + infoName + " p").css({opacity: 1});
-        $("#" + infoName + " p").html("暂停");
-    };
-
-    //隐藏暂停消息
-    var hidePauseMsg = function () {
-        $("#" + infoName + " p").css({opacity: 0});
-    };
-
-    //显示完毕消息
-    var showOverMsg = function () {
-        $("#" + infoName + " p").css({opacity: 1});
-        $("#" + infoName + " p").html("完毕");
-    };
-
-    //隐藏完毕消息
-    var hideOverMsg = function () {
-        $("#" + infoName + " p").css({opacity: 0});
-    };
-
-    //设置播放器控制锁定显示
-    var setPlayerShowLock = function () {
-        playerShowLock = 1;
-    };
-
-    //设置播放器控制解锁显示
-    var setPlayerShowUnLock = function () {
-        playerShowLock = 0;
-    };
-
-    //检查播放器控制是否被锁定显示
-    var checkPlayerShowLock = function () {
-        return playerShowLock;
-    };
-    //暂停
-    var pauseDraw = function () {
-        //显示暂停动画
-        showPauseMsg();
-        //播放按钮样式设置
-        showPlayBtn();
-        //
-        //   setProcessLock();
-        //发送 暂停 事件
-        myplayer.onPause();
-
-    };
-
-    //播放
-    var playDraw = function () {
-        //不显示暂停动画
-        hidePauseMsg();
-        //播放按钮样式设置
-        showPauseBtn();
-        //
-        //  setProcessUnLock();
-        //发送 播放 事件
-        myplayer.onPlay();
-    };
-
-    //播放按钮点击处理
-    var playPauseClick = function () {
-        //pause
-        if ($("#" + playBtnName).css("display") == "none") {
-            pauseDraw();
-        }
-        //play
-        else if ($("#" + pauseBtnName).css("display") == "none") {
-            playDraw();
-        }
-    };
-
-
+<script type="application/javascript">
+    $(document).ready(function () {
+        videoCanvasPlayer($);
+    })
 </script>
 
 </body>

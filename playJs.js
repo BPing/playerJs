@@ -1,4 +1,4 @@
-(function ($) {
+function videoCanvasPlayer($) {
 
     var drawContainerName = "drawContainer";
     var canvasContainerName = "canvasDiv";
@@ -17,8 +17,10 @@
     var timePlayedName = "time_played";
     var timeDurationName = "time_duration";
 
+    $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
+
     var myUI = new VideoCanvasPlayerUI();
-    var myPlayer = new VideoCanvasPlayer({cw: 1080, ch: 648 * 8, vw: 1080, vh: 648, UI: myUI});
+    var myPlayer = new VideoCanvasPlayer({cw: 1080, ch: 600 * 8, vw: 1080, vh: 600, UI: myUI});
 
     myUI.notifyUI = function (act, ctx) {
         if (act == myUI.VIDEO_FRAME) {
@@ -36,12 +38,7 @@
             util.log("VIDEO_END lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
         if (act == myUI.VIDEO_RESET) {
-            var s = timeShow.isLocked();
-            timeShow.unLock();
             timeShow.update(ctx.nowTp, ctx.videoDuration);
-            if (s)
-                timeShow.lock();
-
             util.log("VIDEO_RESET  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
         if (act == myUI.VIDEO_PLAY) {
@@ -64,11 +61,11 @@
                 e.preventDefault();
                 if ($("#" + playBtnName).css("display") == "none") {
                     playPause.pauseDraw();                //pause
-                    myplayer.onPause();
+                    myPlayer.onPause();
                 }
                 else if ($("#" + pauseBtnName).css("display") == "none") {
                     playPause.playDraw();                //play
-                    myplayer.onPlay();
+                    myPlayer.onPlay();
                 }
                 return true;
             });
@@ -81,7 +78,7 @@
                 timeShow.lock();
 
                 playPause.pauseDraw();                //pause
-                myplayer.onPause();
+                myPlayer.onPause();
 
                 return false;
             });
@@ -105,7 +102,7 @@
                 $("#" + progressName).css({width: progresswidth + "%"});
                 $("#" + progressBtnName).css({left: progressBtnwidth + "%"});
 
-                myplayer.timePoint(progresswidth);
+                myPlayer.timePoint(progresswidth);
                 return false;
             });
             $("#" + progressBtnName).bind("mouseout", function (e) {
@@ -134,7 +131,7 @@
     var progress = {
         //进度条位置设置
         setWidth: function (width) {
-            if (!checkProcessLocked()) {
+            if (!progress.isLocked()) {
                 $("#" + progressName).css({width: width + '%'});
                 $("#" + progressBtnName).css({left: width + '%'});
             }
@@ -167,8 +164,6 @@
         isLocked: function () {
             return timeShowLock;
         },
-
-
         //设置显示时间锁定
         lock: function () {
             timeShowLock = 1;
@@ -259,5 +254,5 @@
         }
     };
 
-})
-($);
+}
+
