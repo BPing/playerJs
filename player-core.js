@@ -42,13 +42,10 @@ var vcp = function (o) {
     if (vcp.options.UI instanceof vcpUI) {
         this.UI = vcp.options.UI;
     }
-
     //数据处理器
     this.vcdpr = new vcdpr();
     this.vcdpr.Url = vcp.options.url;
-    this.vcdpr.vcp = this;
-    this.vcdpr.JsonData = JsonData;
-    this.vcdpr.loadOk = true;
+    this.vcdpr.vcpObj = this;
 };
 
 /**
@@ -237,8 +234,19 @@ vcppt.notifyUI = function (action, context) {
     }
 };
 
+/**
+ * 数据是否已成功
+ * 加载完毕
+ */
 vcppt.isLoaded = function () {
     return this.vcdpr.loadOk
+};
+
+/**
+ *  加载数据
+ */
+vcppt.load = function () {
+    this.vcdpr.getJsonData();
 };
 
 
@@ -251,7 +259,7 @@ var vcdpr = function () {
     this.loadOk = false; //数据是否加载完成
     this.lastIndex = 0;
     /** @type vcp */
-    this.vcp = null;
+    this.vcpObj = null;
 };
 
 vcdpr.prototype = {
@@ -261,23 +269,24 @@ vcdpr.prototype = {
      * 保存在 vcdpr.JsonData 变量中
      */
     getJsonData: function () {
+        var own = this;
         $.ajax({
             type: 'get',
             url: this.Url,
-            data: {},
             success: function (d) {
-                d = JSON.parse(d);
-                if (d.hasOwnProperty('reponseNo') && d.hasOwnProperty('videoData') && d.reponseNo == 0) {
-                    this.JsonData = d.videoData;
-                    this.loadOk = true;
-                    this.vcp.notifyUI(this.vcp.UI.VIDEO_LOAD_DATA_SUCCESS);
+                if (typeof d != 'object')
+                    d = JSON.parse(d);
+                if (d.hasOwnProperty('responseNo') && d.hasOwnProperty('videoData') && d.responseNo == 0) {
+                    own.JsonData = d.videoData;
+                    own.loadOk = true;
+                    own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
                     return;
                 }
-                this.vcp.notifyUI(this.vcp.UI.VIDEO_LOAD_DATA_FAILURE);
+                this.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
             },
             error: function (d) {
                 util.log(d);
-                this.vcp.notifyUI(this.vcp.UI.VIDEO_LOAD_DATA_FAILURE);
+                own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
             }
         });
     },
@@ -421,18 +430,15 @@ vc.options = {
     "lineWidth": 1  //线粗细
 };
 
-var hasOwnProp = Object.prototype.hasOwnProperty;
-
-
-vcpt.saveDrawingSurface = function () {
-    this.drawingSurfaceImageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
-};
-
-
-vcpt.restoreDrawingSurface = function () {
-    if (null != this.drawingSurfaceImageData)
-        this.context.putImageData(this.drawingSurfaceImageData, 0, 0);
-};
+//vcpt.saveDrawingSurface = function () {
+//    this.drawingSurfaceImageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+//};
+//
+//
+//vcpt.restoreDrawingSurface = function () {
+//    if (null != this.drawingSurfaceImageData)
+//        this.context.putImageData(this.drawingSurfaceImageData, 0, 0);
+//};
 
 vcpt.getView = function (x, y, w, h) {
     return new viewObj(
@@ -558,367 +564,3 @@ window.requestNextAnimationFrame =
     })
     ();
 
-
-//data stub
-var JsonData = {
-    "screenSize": {
-        "w": 150,
-        "h": 100
-    },
-    "version": 0,
-    "traceData": [
-        {
-            "timestamp": 1000,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 0,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 75,
-                    "PointY": 60,
-                    "time": "",
-                    "pressure": 2
-                },
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 70,
-                    "PointY": 60,
-                    "time": "",
-                    "pressure": 2
-                },
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 70,
-                    "PointY": 65,
-                    "time": "",
-                    "pressure": 2
-                },
-                {
-                    "userType": 1,
-                    "action": 1,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 75,
-                    "PointY": 65,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 2000,
-            "data": [
-                {
-                    "userType": 1,
-                    "screenOffset": 50,
-                    "action": 5
-                }
-            ]
-        },
-        {
-            "timestamp": 3100,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 0,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 75,
-                    "PointY": 140,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 3200,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 70,
-                    "PointY": 140,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 3300,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 70,
-                    "PointY": 145,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 3400,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 1,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 75,
-                    "PointY": 145,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-
-
-        {
-            "timestamp": 4100,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 0,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 14,
-                    "PointY": 65,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 4200,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 1,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 56,
-                    "PointY": 33,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 4300,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 114,
-                    "PointY": 80,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-
-        {
-            "timestamp": 4400,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 114,
-                    "PointY": 80,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-
-        {
-            "timestamp": 4500,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 77,
-                    "PointY": 25,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-
-        {
-            "timestamp": 4600,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 22,
-                    "PointY": 25,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 4700,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 45,
-                    "PointY": 25,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 4800,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 77,
-                    "PointY": 96,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 4900,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 2,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 77,
-                    "PointY": 23,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 5000,
-            "data": [
-                {
-                    "userType": 1,
-                    "action": 1,
-                    "color": {
-                        "a": 0.5,
-                        "r": 124,
-                        "g": 124,
-                        "b": 124
-                    },
-                    "PointX": 140,
-                    "PointY": 25,
-                    "time": "",
-                    "pressure": 2
-                }
-            ]
-        },
-        {
-            "timestamp": 5500,
-            "data": [
-                {
-                    "userType": 1,
-                    "screenOffset": 0,
-                    "action": 5
-                }
-            ]
-        },
-    ],
-    "duration": 6000
-};

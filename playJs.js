@@ -1,3 +1,7 @@
+/**
+ *
+ * @param $
+ */
 function videoCanvasPlayer($) {
 
     var drawContainerName = "drawContainer";
@@ -16,11 +20,12 @@ function videoCanvasPlayer($) {
     var btnMouseDown = 0;
     var timePlayedName = "time_played";
     var timeDurationName = "time_duration";
+    var parseLoadingName = "parseLoading";
 
     $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
 
     var myUI = new VideoCanvasPlayerUI();
-    var myPlayer = new VideoCanvasPlayer({cw: 1080, ch: 600 * 8, vw: 1080, vh: 600, UI: myUI});
+    var myPlayer = new VideoCanvasPlayer({cw: 1080, ch: 600 * 8, vw: 1080, vh: 600, UI: myUI, url: './demo.json'});
 
     myUI.notifyUI = function (act, ctx) {
         if (act == myUI.VIDEO_FRAME) {
@@ -50,15 +55,26 @@ function videoCanvasPlayer($) {
 
             util.log("VIDEO_PAUSE  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
+
+        if (act == myUI.VIDEO_LOAD_DATA_SUCCESS) {
+            playPause.hideDrawLoading();
+            msgShow.show('加载完毕，请点击播放');
+        }
+        if (act == myUI.VIDEO_LOAD_DATA_FAILURE) {
+            playPause.hideDrawLoading();
+            msgShow.show('加载失败，请重试');
+            progress.lock();
+            timeShow.lock();
+        }
     };
 
     var event = {
-
         init: function () {
-
             //播放按钮点击事件
             $("." + playPauseName).bind("click", function (e) {
                 e.preventDefault();
+                if (!myPlayer.isLoaded())  return true;
+
                 if ($("#" + playBtnName).css("display") == "none") {
                     playPause.pauseDraw();                //pause
                     myPlayer.onPause();
@@ -67,25 +83,23 @@ function videoCanvasPlayer($) {
                     playPause.playDraw();                //play
                     myPlayer.onPlay();
                 }
+
                 return true;
             });
 
             //进度条处理事件
             $("#" + progressBtnName).bind("mousedown", function (e) {
                 e.preventDefault();
+                if (progress.isLocked()) return false;
                 btnMouseDown = 1;
                 progress.lock();
-                timeShow.lock();
-
-                playPause.pauseDraw();                //pause
+                playPause.pauseDraw();  //pause
                 myPlayer.onPause();
-
                 return false;
             });
             $("#" + progressBtnName).bind("mousemove", function (e) {
                 e.preventDefault();
                 if (btnMouseDown != 1) return false;
-
                 var pageX = e.pageX;
                 var progressOffsetX = $('#' + progressName).offset().left;
                 var progressBtnOffsetX = $('#' + progressBtnName).parent().offset().left;
@@ -106,22 +120,24 @@ function videoCanvasPlayer($) {
                 return false;
             });
             $("#" + progressBtnName).bind("mouseout", function (e) {
-                btnMouseDown = 0;
-                progress.unLock();
-                timeShow.unLock();
+                if (btnMouseDown == 1) {
+                    btnMouseDown = 0;
+                    progress.unLock();
+                }
                 return false;
             });
             $("#" + progressBtnName).bind("mouseup", function (e) {
-                btnMouseDown = 0;
-                progress.unLock();
-                timeShow.unLock();
+                if (btnMouseDown == 1) {
+                    btnMouseDown = 0;
+                    progress.unLock();
+                }
                 return false;
             });
+
+            playPause.showParseLoading();
+            myPlayer.load();
         }
-
     };
-
-    event.init();
 
     /**
      * 进度条
@@ -169,7 +185,6 @@ function videoCanvasPlayer($) {
             timeShowLock = 1;
         },
 
-
         //解锁显示时间
         unLock: function () {
             timeShowLock = 0;
@@ -185,6 +200,18 @@ function videoCanvasPlayer($) {
      * 播放暂停处理
      */
     var playPause = {
+
+        //显示loading
+        showParseLoading: function () {
+            var left = $("#" + drawContainerName).attr("width") / 2;
+            var top = $("#" + drawContainerName).attr("height") / 2;
+            $("<img id='" + parseLoadingName + "' src='./resource/loading.gif' style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
+        },
+
+        //隐藏loading
+        hideDrawLoading: function () {
+            $("#" + parseLoadingName).remove();
+        },
         //显示为播放
         showPlayBtn: function () {
             $("#" + pauseBtnName).hide();
@@ -195,31 +222,28 @@ function videoCanvasPlayer($) {
         showPauseBtn: function () {
             //不显示暂停动画
             this.hidePauseMsg();
-
             $("#" + playBtnName).hide();
             $("#" + pauseBtnName).show();
         },
 
         //显示暂停消息
         showPauseMsg: function () {
-            $("#" + infoName + " p").css({opacity: 1});
-            $("#" + infoName + " p").html("暂停");
+            msgShow.show("暂停");
         },
 
         //隐藏暂停消息
         hidePauseMsg: function () {
-            $("#" + infoName + " p").css({opacity: 0});
+            msgShow.hide();
         },
 
         //显示完毕消息
         showOverMsg: function () {
-            $("#" + infoName + " p").css({opacity: 1});
-            $("#" + infoName + " p").html("完毕");
+            msgShow.show("完毕")
         },
 
         //隐藏完毕消息
         hideOverMsg: function () {
-            $("#" + infoName + " p").css({opacity: 0});
+            msgShow.hide();
         },
 
         //设置播放器控制锁定显示
@@ -254,5 +278,20 @@ function videoCanvasPlayer($) {
         }
     };
 
+    /**
+     *  信息显示
+     * @type {{show: msgShow.show, hide: msgShow.hide}}
+     */
+    var msgShow = {
+        show: function (msg) {
+            $("#" + infoName + " p").css({opacity: 1});
+            $("#" + infoName + " p").html(msg);
+        },
+        hide: function () {
+            $("#" + infoName + " p").css({opacity: 0});
+        }
+    }
+
+    event.init();
 }
 

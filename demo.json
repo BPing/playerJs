@@ -1,157 +1,360 @@
 {
-  "screenSize": {
-    "w": 150,
-    "h": 800
-  },
-  "version": 0,
-  "traceData": [
-    {
-      "timestamp": 1000,
-      "data": [
-        {
-          "userType": 1,
-          "action": 0,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
-          },
-          "PointX": 75,
-          "PointY": 60,
-          "time": "",
-          "pressure": 2
-        },
-        {
-          "userType": 1,
-          "action": 2,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
-          },
-          "PointX": 70,
-          "PointY": 60,
-          "time": "",
-          "pressure": 2
-        },
-        {
-          "userType": 1,
-          "action": 2,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
-          },
-          "PointX": 70,
-          "PointY": 65,
-          "time": "",
-          "pressure": 2
-        },
-        {
-          "userType": 1,
-          "action": 1,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
-          },
-          "PointX": 75,
-          "PointY": 65,
-          "time": "",
-          "pressure": 2
-        }
-      ]
+  "responseNo": 0,
+  "videoData": {
+    "screenSize": {
+      "w": 150,
+      "h": 100
     },
-    {
-      "timestamp": 2000,
-      "data": [
-        {
-          "userType": 1,
-          "screenOffset": "50",
-          "action": 5
-        }
-      ]
-    },
-    {
-      "timestamp": 3100,
-      "data": [
-        {
-          "userType": 1,
-          "action": 0,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
+    "version": 0,
+    "traceData": [
+      {
+        "timestamp": 1000,
+        "data": [
+          {
+            "userType": 1,
+            "action": 0,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 75,
+            "PointY": 60,
+            "time": "",
+            "pressure": 2
           },
-          "PointX": 75,
-          "PointY": 40,
-          "time": "",
-          "pressure": 2
-        }
-      ]
-    },
-    {
-      "timestamp": 3200,
-      "data": [
-        {
-          "userType": 1,
-          "action": 2,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 70,
+            "PointY": 60,
+            "time": "",
+            "pressure": 2
           },
-          "PointX": 70,
-          "PointY": 40,
-          "time": "",
-          "pressure": 2
-        }
-      ]
-    },
-    {
-      "timestamp": 3300,
-      "data": [
-        {
-          "userType": 1,
-          "action": 2,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 70,
+            "PointY": 65,
+            "time": "",
+            "pressure": 2
           },
-          "PointX": 70,
-          "PointY": 45,
-          "time": "",
-          "pressure": 2
-        }
-      ]
-    },
-    {
-      "timestamp": 3400,
-      "data": [
-        {
-          "userType": 1,
-          "action": 1,
-          "color": {
-            "a": 0.5,
-            "r": 124,
-            "g": 124,
-            "b": 124
-          },
-          "PointX": 75,
-          "PointY": 45,
-          "time": "",
-          "pressure": 2
-        }
-      ]
-    }
-  ],
-  "duration": 6000
+          {
+            "userType": 1,
+            "action": 1,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 75,
+            "PointY": 65,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 2000,
+        "data": [
+          {
+            "userType": 1,
+            "screenOffset": 50,
+            "action": 5
+          }
+        ]
+      },
+      {
+        "timestamp": 3100,
+        "data": [
+          {
+            "userType": 1,
+            "action": 0,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 75,
+            "PointY": 140,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 3200,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 70,
+            "PointY": 140,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 3300,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 70,
+            "PointY": 145,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 3400,
+        "data": [
+          {
+            "userType": 1,
+            "action": 1,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 75,
+            "PointY": 145,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4100,
+        "data": [
+          {
+            "userType": 1,
+            "action": 0,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 14,
+            "PointY": 65,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4200,
+        "data": [
+          {
+            "userType": 1,
+            "action": 1,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 56,
+            "PointY": 33,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4300,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 114,
+            "PointY": 80,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4400,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 114,
+            "PointY": 80,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4500,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 77,
+            "PointY": 25,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4600,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 22,
+            "PointY": 25,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4700,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 45,
+            "PointY": 25,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4800,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 77,
+            "PointY": 96,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 4900,
+        "data": [
+          {
+            "userType": 1,
+            "action": 2,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 77,
+            "PointY": 23,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 5000,
+        "data": [
+          {
+            "userType": 1,
+            "action": 1,
+            "color": {
+              "a": 0.5,
+              "r": 124,
+              "g": 124,
+              "b": 124
+            },
+            "PointX": 140,
+            "PointY": 25,
+            "time": "",
+            "pressure": 2
+          }
+        ]
+      },
+      {
+        "timestamp": 5500,
+        "data": [
+          {
+            "userType": 1,
+            "screenOffset": 0,
+            "action": 5
+          }
+        ]
+      }
+    ],
+    "duration": 6000
+  }
 }

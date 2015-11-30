@@ -7,6 +7,8 @@
  */
 var util = {};
 
+var hasOwnProp = Object.prototype.hasOwnProperty;
+
 util.logOn = true;
 /**
  * 合并对象 ，obj2会覆盖obj1已有的
