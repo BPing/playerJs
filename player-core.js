@@ -230,6 +230,7 @@ vcppt.timePoint = function (tp) {
 vcppt.notifyUI = function (action, context) {
     if (typeof this.UI.notifyUI == 'function') {
         if (typeof context == 'undefined') context = this;
+        if (action == this.UI.VIDEO_LOAD_DATA_SUCCESS)   this.videoDuration = this.vcdpr.getDuration();
         this.UI.notifyUI(action, context)
     }
 };
@@ -260,6 +261,7 @@ var vcdpr = function () {
     this.lastIndex = 0;
     /** @type vcp */
     this.vcpObj = null;
+    this.imgCause = [];
 };
 
 vcdpr.prototype = {

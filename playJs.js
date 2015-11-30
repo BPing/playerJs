@@ -47,18 +47,17 @@ function videoCanvasPlayer($) {
             util.log("VIDEO_RESET  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
         if (act == myUI.VIDEO_PLAY) {
-
             util.log("VIDEO_PLAY  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
 
         if (act == myUI.VIDEO_PAUSE) {
-
             util.log("VIDEO_PAUSE  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
 
         if (act == myUI.VIDEO_LOAD_DATA_SUCCESS) {
             playPause.hideDrawLoading();
-            msgShow.show('加载完毕，请点击播放');
+            msgShow.show('加载完毕,请播放');
+            timeShow.update(ctx.nowTp, ctx.videoDuration);
         }
         if (act == myUI.VIDEO_LOAD_DATA_FAILURE) {
             playPause.hideDrawLoading();
@@ -68,6 +67,11 @@ function videoCanvasPlayer($) {
         }
     };
 
+    /**
+     * 事件处理
+     *
+     * @type {{init: event.init}}
+     */
     var event = {
         init: function () {
             //播放按钮点击事件
@@ -290,7 +294,7 @@ function videoCanvasPlayer($) {
         hide: function () {
             $("#" + infoName + " p").css({opacity: 0});
         }
-    }
+    };
 
     event.init();
 }
