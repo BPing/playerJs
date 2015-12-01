@@ -261,7 +261,9 @@ var vcdpr = function () {
     this.lastIndex = 0;
     /** @type vcp */
     this.vcpObj = null;
-    this.imgCause = [];
+
+    /** 图片加载缓存 @type array */
+    this.imgCache = [];
 };
 
 vcdpr.prototype = {
