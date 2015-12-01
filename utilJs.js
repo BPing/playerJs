@@ -110,9 +110,9 @@ util.http = {
         data: {},
         dataType: "html",
         method: "GET",
-        success: function () {
+        success: function (t) {
         },
-        error: function () {
+        error: function (s, t) {
         }
     },
     ajax: function (_options) {
@@ -160,7 +160,7 @@ util.http = {
         _xmlHttp.send(data);
     }
     ,
-   //get方式请求
+    //get方式请求
     get: function (_u, _s, _e) {
         this.ajax({
             url: _u,
@@ -184,5 +184,92 @@ util.http = {
         }
         throw new Error("XMLHttp object could not be created.");
     }
-}
-;
+};
+
+/**
+ * @type {HTMLDocument}
+ */
+var doc = document;
+
+/**
+ * 替代jquery
+ *
+ *  $ = jQuery || function (a) {
+ *       return new ele(doc.querySelector(a), a)
+ *   };
+ *
+ * @param {HTMLElement} e
+ * @param {string} s
+ */
+util.ele = function (e, s) {
+    this.e = e;
+    this.s = s;
+    if (!this.e) {
+        util.log(s + " element querySelector fail");
+    }
+};
+
+util.ele.prototype = {
+    html: function (h) {
+        this.e && (this.e.innerHTML = h);
+    },
+    css: function (c) {
+        if (!this.e || !c || typeof c != 'object') return;
+        for (var k in c) {
+            this.e.style.setProperty(k, c[k], '');
+        }
+    },
+    hide: function () {
+        this.e && this.e.setAttribute('olddisplay', this.e.style.display == 'none' ? '' : this.e.style.display) && (this.e.style.display = 'none');
+    },
+    show: function () {
+        var old = this.e ? this.e.hasAttribute('olddisplay') ? this.e.getAttribute('olddisplay') : '' : '';
+        this.e && (this.e.style.display = old);
+    },
+    remove: function () {
+        this.e && this.e.parentNode && this.e.parentNode.removeChild(this.e);
+    },
+    insertAfter: function (s) {
+        var div = doc.createElement("div");
+        div.innerHTML = this.s;
+        var a = div.firstChild;
+        var e = doc.querySelector(s);
+        a && e && e.parentNode && e.parentNode.insertBefore(a, e.nextSibling);
+    },
+    prependTo: function (s) {
+        var div = doc.createElement("div");
+        div.innerHTML = this.s;
+        var a = div.firstChild;
+        var e = doc.querySelector(s);
+        a && e && e.insertBefore(a, e.firstChild);
+    }
+    , append: function (s) {
+        var div = doc.createElement("div");
+        div.innerHTML = this.s;
+        var a = div.firstChild;
+        var e = doc.querySelector(s);
+        a && e && e.appendChild(a);
+    },
+    ready: function (fn) {
+        if (typeof fn == 'function')
+            window.onload = fn;
+    },
+    attr: function (s) {
+        if (!this.e) return '';
+        return this.e.getAttribute(s);
+    }
+};
+
+util.$$ = function (a) {
+    var node = null;
+    try {
+        node = a instanceof Node ? a : document.querySelector(a)
+    } catch (e) {
+        node = null;
+        util.log(e.message);
+    }
+    return new util.ele(node, typeof a == 'string' ? a : '');
+};
+
+var $ = ('undefined' != typeof jQuery ? jQuery : util.$$);
+window.$ = $;

@@ -263,7 +263,8 @@ var vcdpr = function () {
     this.vcpObj = null;
 
     /** 图片加载缓存 @type array */
-    this.imgCache = [];
+    this.imgCache = []
+
 };
 
 vcdpr.prototype = {

@@ -2,7 +2,7 @@
  *
  * @param $
  */
-function videoCanvasPlayer($) {
+function videoCanvasPlayer() {
 
     var drawContainerName = "drawContainer";
     var canvasContainerName = "canvasDiv";
@@ -288,11 +288,11 @@ function videoCanvasPlayer($) {
      */
     var msgShow = {
         show: function (msg) {
-            $("#" + infoName + " p").css({opacity: 1});
-            $("#" + infoName + " p").html(msg);
+            document.querySelector("#" + infoName + " p").style.opacity = 1;
+            document.querySelector("#" + infoName + " p").innerHTML = msg;
         },
         hide: function () {
-            $("#" + infoName + " p").css({opacity: 0});
+            document.querySelector("#" + infoName + " p").style.opacity = 0;
         }
     };
 
