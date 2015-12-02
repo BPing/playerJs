@@ -62,6 +62,10 @@ util.log = function (msg) {
 /**
  * timeFormat
  *
+ *      5004 => 00:05
+ *      5994 => 00:05
+ *      6000 => 00:06
+ *
  * @param {number} tt 毫秒
  * @returns {string} 分:秒
  */
@@ -70,7 +74,7 @@ util.timeFormat = function (tt) {
     var sec = '00';
     if (typeof tt == 'number') {
         min = Math.floor((tt / 1000) / 60);
-        sec = Math.round(tt / 1000) - min * 60;
+        sec = Math.floor(tt / 1000) - min * 60;
         if (sec < 10) {
             sec = '0' + sec;
         }
@@ -204,27 +208,37 @@ var doc = document;
 util.ele = function (e, s) {
     this.e = e;
     this.s = s;
-    if (!this.e) {
-        util.log(s + " element querySelector fail");
-    }
+    //if (!this.e) {
+    //    util.log(s + " element querySelector fail");
+    //}
 };
 
 util.ele.prototype = {
     html: function (h) {
         this.e && (this.e.innerHTML = h);
     },
-    css: function (c) {
-        if (!this.e || !c || typeof c != 'object') return;
-        for (var k in c) {
-            this.e.style.setProperty(k, c[k], '');
+    css: function (o) {
+        if (this.e && o && typeof o == 'object') {
+            for (var k in o) {
+                if (hasOwnProp.call(o, k)) {
+                    this.e.style.setProperty(k, o[k], '');
+                }
+            }
+        } else if (this.e && typeof o == 'string') {
+            return this.e.style.getPropertyValue(o);
         }
+
     },
     hide: function () {
-        this.e && this.e.setAttribute('olddisplay', this.e.style.display == 'none' ? '' : this.e.style.display) && (this.e.style.display = 'none');
+        if (!this.e) return;
+        this.e.setAttribute('olddisplay', this.e.style.display == 'none' ? '' : this.e.style.display);
+        this.e.style.display = 'none';
+        util.log("hide:" + this.e.style.display);
     },
     show: function () {
         var old = this.e ? this.e.hasAttribute('olddisplay') ? this.e.getAttribute('olddisplay') : '' : '';
-        this.e && (this.e.style.display = old);
+        this.e && 'none' == this.e.style.display && (this.e.style.display = old);
+        util.log("show:" + this.e.style.display);
     },
     remove: function () {
         this.e && this.e.parentNode && this.e.parentNode.removeChild(this.e);
@@ -255,11 +269,45 @@ util.ele.prototype = {
             window.onload = fn;
     },
     attr: function (s) {
-        if (!this.e) return '';
-        return this.e.getAttribute(s);
+        return this.e ? this.e.getAttribute(s) : '';
+    },
+    bind: function (s, fn) {
+        this.e && (this.e.addEventListener ? this.e.addEventListener(s, fn) : this.e.attachEvent && this.e.attachEvent("on" + s, fn));
+        // return this;
+    },
+    unbind: function (s, fn) {
+        this.e && (this.e.removeEventListener ? this.e.removeEventListener(s, fn) : this.e.detachEvent && this.e.detachEvent("on" + s, fn));
+        // return this;
+    },
+    offset: function () {
+        var b, c, f = this.e && this.e.ownerDocument, e = this.e, w = f && (f.defaultView || f.parentWindow), d = {
+            top: 0,
+            left: 0
+        };
+        return e && typeof  e.getBoundingClientRect !== 'undefined' ? ((d = e.getBoundingClientRect()), b = f.documentElement, c = w, {
+            top: d.top + (c.pageYOffset || b.scrollTop) - (b.clientTop || 0),
+            left: d.left + (c.pageXOffset || b.scrollLeft) - (b.clientLeft || 0)
+        }) : d;
+    },
+    width: function () {
+        return this.e && this.e !== doc && this.e !== doc.parentWindow && 1 == this.e.nodeType ? this.e.offsetWidth : 0
+    },
+    height: function () {
+        return this.e && this.e !== doc && this.e !== doc.parentWindow && 1 == this.e.nodeType ? this.e.offsetHeight : 0
+    },
+    parent: function () {
+        if (this.e) {
+            return new util.ele(this.e.parentNode, this.e.parentNode.nodeName);
+        }
     }
 };
 
+/**
+ * 封装元素
+ *
+ * @param a
+ * @returns {util.ele}
+ */
 util.$$ = function (a) {
     var node = null;
     try {

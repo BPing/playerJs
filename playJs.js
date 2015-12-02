@@ -288,14 +288,12 @@ function videoCanvasPlayer() {
      */
     var msgShow = {
         show: function (msg) {
-            document.querySelector("#" + infoName + " p").style.opacity = 1;
-            document.querySelector("#" + infoName + " p").innerHTML = msg;
+            $("#" + infoName + " p").css({opacity: 1});
+            $("#" + infoName + " p").html(msg);
         },
         hide: function () {
-            document.querySelector("#" + infoName + " p").style.opacity = 0;
+            $("#" + infoName + " p").css({opacity: 0});
         }
     };
-
     event.init();
 }
-
