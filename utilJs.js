@@ -196,7 +196,7 @@ util.http = {
 var doc = document;
 
 /**
- * 替代jquery
+ * 替代jquery，目前只支持简单操作
  *
  *  $ = jQuery || function (a) {
  *       return new ele(doc.querySelector(a), a)
@@ -296,7 +296,7 @@ util.ele.prototype = {
         return this.e && this.e !== doc && this.e !== doc.parentWindow && 1 == this.e.nodeType ? this.e.offsetHeight : 0
     },
     parent: function () {
-        if (this.e) {
+        if (this.e && this.e.parentNode) {
             return new util.ele(this.e.parentNode, this.e.parentNode.nodeName);
         }
     }
