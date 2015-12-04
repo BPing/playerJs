@@ -240,7 +240,7 @@ vcppt.notifyUI = function (action, context) {
  * 加载完毕
  */
 vcppt.isLoaded = function () {
-    return this.vcdpr.loadOk
+    return this.vcdpr.isReadied();
 };
 
 /**
@@ -263,7 +263,9 @@ var vcdpr = function () {
     this.vcpObj = null;
 
     /** 图片加载缓存 @type array */
-    this.imgCache = []
+    this.imgCache = [];
+    this.imgLoadedCount = 0; //已经加载完的图片数量
+    this.imgIsLoaded = false; //是否所有图片加载完
 
 };
 
@@ -284,17 +286,79 @@ vcdpr.prototype = {
                     d = JSON.parse(d);
                 if (d.hasOwnProperty('responseNo') && d.hasOwnProperty('videoData') && d.responseNo == 0) {
                     own.JsonData = d.videoData;
+                    own.preProcessor();
                     own.loadOk = true;
-                    own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
+                    own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
                     return;
                 }
-                this.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
+                own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
             },
             error: function (d) {
                 util.log(d);
-                own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
+                own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
             }
         });
+    },
+
+    /**
+     * 数据预处理
+     */
+    preProcessor: function () {
+
+        var traceData = this.JsonData.traceData;
+        var len = this.JsonData.traceData.length;
+        for (var ti = 0; ti < len; ti++) { //时间戳数据
+            for (var dj = 0; dj < traceData[ti].data.length; dj++) {  //遍历每一条action数据
+                var action = traceData[ti].data[dj];
+                if (action.length <= 0) continue;
+                if (action.action in [0, 1, 2]) { //笔迹
+                    if (typeof action.screenOffset == 'undefined' || action.screenOffset == 0)  continue;
+                    action.PointY = action.PointY + (action.screenOffset / 100) * this.JsonData.screenSize.h;
+                    continue;
+                }
+                if (action.action == 5) { //视图移动
+                    continue;
+                }
+                if (action.action == 9) { //图片
+                    this.imgCache[action.imgName] = '';
+                    continue;
+                }
+            }
+        }
+
+        this.imgsLoad();
+    },
+
+    /**
+     * 图片预加载
+     */
+    imgsLoad: function () {
+        var own = this;
+        if (this.imgCache.length <= 0) {
+            own.imgIsLoaded = true;
+            own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
+            return;
+        }
+        var http = this.JsonData.imgPath;
+
+        for (var imgName in this.imgCache) {
+            var imgID = new Image();
+            imgID.src = http + imgName;
+            imgID.onload = function () {
+                own.imgLoadedCount++;
+                imgID.loaded = true;
+                if (own.imgLoadedCount == own.imgCache.length) { //全部加载完毕
+                    own.imgIsLoaded = true;
+                    own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
+                }
+            };
+            this.imgCache[imgName] = imgID;
+        }
+    },
+
+    toUI: function (type) {
+        if (type == this.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS && (!this.loadOk || !this.imgIsLoaded)) return;
+        this.vcpObj.notifyUI(type);
     },
 
     /**
@@ -340,7 +404,14 @@ vcdpr.prototype = {
      */
     isEnd: function () {
         return this.lastIndex >= this.JsonData.traceData.length;
+    },
+    /**
+     * 数据是否准备完毕
+     */
+    isReadied: function () {
+        return this.loadOk && this.imgIsLoaded;
     }
+
 };
 
 ///**
