@@ -143,20 +143,52 @@ vcppt.playback = function (time) {
         this.wr = this.view.W / s.w;
         this.hr = this.view.H / s.h;
 
-        util.each(drawdate, function (k, v) {
+        util.each(drawdate, function (k, v) { //动作处理
+
             if (v.action == 0) {
                 this.videoCanvas.penDown(v.PointX * this.wr, v.PointY * this.hr);
+                return;
             }
 
             if (v.action == 2) {
                 this.videoCanvas.penMove(v.PointX * this.wr, v.PointY * this.hr);
+                return;
             }
 
             if (v.action == 1) {
                 this.videoCanvas.penUp(v.PointX * this.wr, v.PointY * this.hr);
+                return;
             }
-            if (v.action == 5) {
+
+            if (v.action == 5) { //视图移动
                 this.videoCanvas.viewMove(0, v.screenOffset / 100 * this.view.H, this.view);
+                return;
+            }
+
+            if (v.action == 9) { //图像
+                var img = this.vcdpr.getImg(v.imgName);
+                if (!(img instanceof Image)) return;
+                var x = 0, y = v.screenIndex * this.view.H;
+
+                if (v.mode == 0 || (img.width >= this.view.W && img.height >= this.view.H)) { //铺满全屏
+                    this.videoCanvas.drawImage(img, x, y, this.view.W, this.view.H);
+                    return;
+                }
+
+                //模式:按图片大小进行加载,最大一页(视口大小)
+                if (img.width >= this.view.W) { //宽超出页面宽度
+                    var w = this.view.W, h = img.height * (this.view.W / img.width);//比例缩放处理
+                    this.videoCanvas.drawImage(img, x, y, w, h);
+                    return;
+                }
+
+                if (img.height >= this.view.H) { //高超出页面高度
+                    var w = img.width * (this.view.H / img.height), h = this.view.H; //比例缩放处理
+                    this.videoCanvas.drawImage(img, x, y, w, h);
+                    return;
+                }
+
+                this.videoCanvas.drawImage(img, x, y);
             }
         }, this);
     } while (false);
@@ -263,7 +295,7 @@ var vcdpr = function () {
     this.vcpObj = null;
 
     /** 图片加载缓存 @type array */
-    this.imgCache = [];
+    this.imgCache = {};
     this.imgLoadedCount = 0; //已经加载完的图片数量
     this.imgIsLoaded = false; //是否所有图片加载完
 
@@ -357,6 +389,7 @@ vcdpr.prototype = {
     },
 
     toUI: function (type) {
+        //只有数据加载和图片加载完毕，才允许发送数据加载完毕信号
         if (type == this.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS && (!this.loadOk || !this.imgIsLoaded)) return;
         this.vcpObj.notifyUI(type);
     },
@@ -392,6 +425,9 @@ vcdpr.prototype = {
         return this.JsonData.screenSize
     },
 
+    getImg: function (imgName) {
+        return this.imgCache.hasOwnProperty(imgName) ? this.imgCache[imgName] : '';
+    },
     resetLastIndex: function (i) {
         this.lastIndex = 0;
         if (typeof i == 'number' && i >= 0 && i <= this.JsonData.traceData.length) {
@@ -507,15 +543,15 @@ vc.options = {
     "lineWidth": 1  //线粗细
 };
 
-//vcpt.saveDrawingSurface = function () {
-//    this.drawingSurfaceImageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
-//};
-//
-//
-//vcpt.restoreDrawingSurface = function () {
-//    if (null != this.drawingSurfaceImageData)
-//        this.context.putImageData(this.drawingSurfaceImageData, 0, 0);
-//};
+vcpt.saveDrawingSurface = function () {
+    this.drawingSurfaceImageData = this.context.getImageData(0, 0, this.canvas.width, this.canvas.height);
+};
+
+
+vcpt.restoreDrawingSurface = function () {
+    if (null != this.drawingSurfaceImageData)
+        this.context.putImageData(this.drawingSurfaceImageData, 0, 0);
+};
 
 vcpt.getView = function (x, y, w, h) {
     return new viewObj(
@@ -551,8 +587,9 @@ vcpt.clearCanvas = function () {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 };
 
-vcpt.drawImage = function () {
-
+vcpt.drawImage = function (img, x, y, w, h) {
+    if (img instanceof Image)
+        this.context.drawImage(img, x, y, w, h);
 };
 
 vcpt.notice = function (vc) {
