@@ -678,3 +678,30 @@ window.requestNextAnimationFrame =
     })
     ();
 
+/**
+ * 音频处理
+ */
+var pAudio = function () {
+    this.audio = document.createElement("audio");
+};
+
+pAudio.prototype = {
+    play: function () {
+
+    },
+    pause: function () {
+
+    },
+    setVolume: function (v) {
+        if (v > 0.0 && v < 1.0) {
+            this.audio.volume = v;
+        }
+    },
+    setSrc: function (s) {
+      this.audio.src=s;
+    }
+};
+
+
+
+

@@ -22,6 +22,8 @@ util.mergeOptions = function (obj1, obj2) {
         return obj1;
     }
     for (var key in obj2) {
+
+        
         if (hasOwnProp.call(obj2, key)) {
             obj1[key] = obj2[key];
         }
