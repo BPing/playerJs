@@ -21,6 +21,8 @@ function videoCanvasPlayer() {
     var timePlayedName = "time_played";
     var timeDurationName = "time_duration";
     var parseLoadingName = "parseLoading";
+    var volumeControlName = "volume-scrubber";
+    var volumeProgressName = "volume-progress";
 
     $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
 
@@ -28,22 +30,31 @@ function videoCanvasPlayer() {
     var myPlayer = new VideoCanvasPlayer({cw: 1080, ch: 600 * 8, vw: 1080, vh: 600, UI: myUI, url: './demo.json'});
 
     myUI.notifyUI = function (act, ctx) {
+
         if (act == myUI.VIDEO_FRAME) {
-            timeShow.update(ctx.nowTp, ctx.videoDuration);
-            progress.setWidth(ctx.videoDuration <= 0 ? 0 : (ctx.nowTp / ctx.videoDuration) * 100);
+            timeShowUI.update(ctx.nowTp, ctx.videoDuration);
+            progressUI.setWidth(ctx.videoDuration <= 0 ? 0 : (ctx.nowTp / ctx.videoDuration) * 100, true);
 
             util.log("VIDEO_FRAME lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
+
         if (act == myUI.VIDEO_END) {
-            timeShow.update(ctx.videoDuration, ctx.videoDuration);
-            progress.setWidth(100);
-            playPause.pauseDraw();
-            playPause.showOverMsg();
+            timeShowUI.update(ctx.videoDuration, ctx.videoDuration);
+            progressUI.setWidth(100, true);
+            playPauseUI.pauseDraw();
+            playPauseUI.showOverMsg();
 
             util.log("VIDEO_END lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
+
         if (act == myUI.VIDEO_RESET) {
-            timeShow.update(ctx.nowTp, ctx.videoDuration);
+            timeShowUI.update(ctx.nowTp, ctx.videoDuration);
+            util.log("VIDEO_RESET  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
+        }
+
+        if (act == myUI.VIDEO_END_RESET) {
+            timeShowUI.update(ctx.nowTp, ctx.videoDuration);
+            progressUI.setWidth(ctx.videoDuration <= 0 ? 0 : Math.floor(ctx.nowTp / 1000) / (ctx.videoDuration / 100000), true);
             util.log("VIDEO_RESET  lastftp:" + ctx.lastftp + " nowTp:" + ctx.nowTp);
         }
         if (act == myUI.VIDEO_PLAY) {
@@ -55,15 +66,17 @@ function videoCanvasPlayer() {
         }
 
         if (act == myUI.VIDEO_LOAD_DATA_SUCCESS) {
-            playPause.hideDrawLoading();
+            playPauseUI.hideDrawLoading();
+            audioUI.setVolume(ctx.getVolume());
             msgShow.show('加载完毕,请播放');
-            timeShow.update(ctx.nowTp, ctx.videoDuration);
+            timeShowUI.update(ctx.nowTp, ctx.videoDuration);
         }
+
         if (act == myUI.VIDEO_LOAD_DATA_FAILURE) {
-            playPause.hideDrawLoading();
+            playPauseUI.hideDrawLoading();
             msgShow.show('加载失败，请重试');
-            progress.lock();
-            timeShow.lock();
+            progressUI.lock();
+            timeShowUI.lock();
         }
     };
 
@@ -72,7 +85,7 @@ function videoCanvasPlayer() {
      *
      * @type {{init: event.init}}
      */
-    var event = {
+    var eventUI = {
         init: function () {
             //播放按钮点击事件
             $("." + playPauseName).bind("click", function (e) {
@@ -80,11 +93,11 @@ function videoCanvasPlayer() {
                 if (!myPlayer.isLoaded())  return true;
 
                 if ($("#" + playBtnName).css("display") == "none") {
-                    playPause.pauseDraw();                //pause
+                    playPauseUI.pauseDraw();                //pause
                     myPlayer.onPause();
                 }
                 else if ($("#" + pauseBtnName).css("display") == "none") {
-                    playPause.playDraw();                //play
+                    playPauseUI.playDraw();                //play
                     myPlayer.onPlay();
                 }
 
@@ -94,10 +107,10 @@ function videoCanvasPlayer() {
             //进度条处理事件
             $("#" + progressBtnName).bind("mousedown", function (e) {
                 e.preventDefault();
-                if (progress.isLocked()) return false;
+                if (progressUI.isLocked()) return false;
                 btnMouseDown = 1;
-                progress.lock();
-                playPause.pauseDraw();  //pause
+                progressUI.lock();
+                playPauseUI.pauseDraw();  //pause
                 myPlayer.onPause();
                 return false;
             });
@@ -126,19 +139,37 @@ function videoCanvasPlayer() {
             $("#" + progressBtnName).bind("mouseout", function (e) {
                 if (btnMouseDown == 1) {
                     btnMouseDown = 0;
-                    progress.unLock();
+                    progressUI.unLock();
+                    myPlayer.notifyUI(myUI.VIDEO_END_RESET);
                 }
                 return false;
             });
             $("#" + progressBtnName).bind("mouseup", function (e) {
                 if (btnMouseDown == 1) {
                     btnMouseDown = 0;
-                    progress.unLock();
+                    progressUI.unLock();
+                    myPlayer.notifyUI(myUI.VIDEO_END_RESET);
                 }
                 return false;
             });
 
-            playPause.showParseLoading();
+            $("#" + volumeControlName).bind("click", function (e) {
+                e.preventDefault();
+                //计算音量值,并设置
+                var volumeDistance = e.pageX - $("#" + volumeControlName).offset().left;
+                var volume = volumeDistance / $("#" + volumeControlName).width();
+
+                var progressWdith = eval(volume * 100);
+                if (parseFloat(progressWdith) > 100) {
+                    progressWdith = "100";
+                }
+                //改变音量proress的显示
+                audioUI.setVolume(progressWdith);
+                myPlayer.setVolume(progressWdith);
+                return false;
+            });
+
+            playPauseUI.showParseLoading();
             myPlayer.load();
         }
     };
@@ -148,10 +179,16 @@ function videoCanvasPlayer() {
      *
      * @type {{}}
      */
-    var progress = {
-        //进度条位置设置
-        setWidth: function (width) {
-            if (!progress.isLocked()) {
+    var progressUI = {
+
+        /**
+         * 进度条位置设置
+         *
+         * @param width
+         * @param flag 强制更新
+         */
+        setWidth: function (width, flag) {
+            if (!progressUI.isLocked() || flag) {
                 $("#" + progressName).css({width: width + '%'});
                 $("#" + progressBtnName).css({left: width + '%'});
             }
@@ -179,7 +216,7 @@ function videoCanvasPlayer() {
      *
      * @type {{}}
      */
-    var timeShow = {
+    var timeShowUI = {
 
         isLocked: function () {
             return timeShowLock;
@@ -203,7 +240,7 @@ function videoCanvasPlayer() {
     /**
      * 播放暂停处理
      */
-    var playPause = {
+    var playPauseUI = {
 
         //显示loading
         showParseLoading: function () {
@@ -283,6 +320,18 @@ function videoCanvasPlayer() {
     };
 
     /**
+     * 音频
+     * @type {{}}
+     */
+    var audioUI = {
+
+        setVolume: function (w) {
+            $("#" + volumeProgressName).css({width: w + "%"});
+        }
+
+    };
+
+    /**
      *  信息显示
      * @type {{show: msgShow.show, hide: msgShow.hide}}
      */
@@ -295,5 +344,6 @@ function videoCanvasPlayer() {
             $("#" + infoName + " p").css({opacity: 0});
         }
     };
-    event.init();
+
+    eventUI.init();
 }

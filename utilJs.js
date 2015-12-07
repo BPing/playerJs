@@ -22,8 +22,6 @@ util.mergeOptions = function (obj1, obj2) {
         return obj1;
     }
     for (var key in obj2) {
-
-        
         if (hasOwnProp.call(obj2, key)) {
             obj1[key] = obj2[key];
         }
@@ -56,9 +54,7 @@ util.each = function (obj, fn, context) {
  * @param {string} msg
  */
 util.log = function (msg) {
-    if (util.logOn) {
-        console.log(msg);
-    }
+    util.logOn && console && console.log(msg);
 };
 
 /**
@@ -100,6 +96,41 @@ util.boundary = function (v, min, max) {
         return 100;
     return v;
 };
+
+/**
+ * 判断对象是否为空（Array）
+ *
+ * @param o  对象  如果不是对象，则统一判断为空
+ * @returns {boolean}  true|false  空|非空
+ */
+util.empty = function (o) {
+
+    if (typeof o === "object" && o instanceof Array) return o.length <= 0 ? true : false; //数组判断
+    if (typeof o === "object") { //其他对象判断
+        for (var p in o) { //
+            return false;
+        }
+    }
+    return true; //其他情况则判断为空
+};
+
+/**
+ *  对象属性个数
+ *
+ * @param {object} o
+ * @returns {number}
+ */
+util.len = function (o) {
+    if (typeof o === "object" && o instanceof Array) return o.length; //数组判断
+    var len = 0;
+    if (typeof o === "object") { //其他对象判断
+        for (var p in o) { //
+            len++;
+        }
+    }
+    return len; //其他情况则判断为空
+};
+
 
 String.prototype.trim = function () {
     return this.replace(/(^\s*)|(\s*$)/g, "");

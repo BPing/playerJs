@@ -12,6 +12,7 @@
  *     var myPlayer = vcp({});
  *
  *  @param {object} o  options
+ *  @notice  audio :mp3 or wav or ogg
  */
 var vcp = function (o) {
 
@@ -27,7 +28,7 @@ var vcp = function (o) {
     this.videoCanvas = new vc(vcp.options);
     this.view = this.videoCanvas.getView(0, 0); //获取视口实例
 
-    this.pause = false; //是否暂停
+    this.pause = true; //是否暂停
     this.lastftp = 0; // 上一帧的时间戳
     this.nowTp = 0; // 视频正在播放的相对时间点()
     this.videoDuration = 0; //视频总时长
@@ -46,6 +47,9 @@ var vcp = function (o) {
     this.vcdpr = new vcdpr();
     this.vcdpr.Url = vcp.options.url;
     this.vcdpr.vcpObj = this;
+
+    this.audio = new pAudio(this);
+    this.setVolume(vcp.options.volume);
 };
 
 /**
@@ -65,18 +69,21 @@ var vcp = function (o) {
  *        }
  *
  * @notice notifyUI必须是函数方法。
+ * @todo 或者换成事件注册和触发模式
  */
 var vcpUI = function () {
 };
 
 vcpUI.prototype = {
-    VIDEO_PLAY: 1,
-    VIDEO_PAUSE: 2,
-    VIDEO_END: 3,
-    VIDEO_FRAME: 4,
-    VIDEO_RESET: 5,
-    VIDEO_LOAD_DATA_SUCCESS: 6,
-    VIDEO_LOAD_DATA_FAILURE: 7,
+    VIDEO_PLAY: 1, //开始播放
+    VIDEO_PAUSE: 2, //暂停
+    VIDEO_END: 3,   //结束播放
+    VIDEO_FRAME: 4,  //每一帧
+    VIDEO_RESET: 5,  //重置
+    VIDEO_LOAD_DATA_SUCCESS: 6, //数据加载成功
+    VIDEO_LOAD_DATA_FAILURE: 7, //数据加载失败
+    VIDEO_END_RESET: 8,  //结束重置
+    VIDEO_VOLUME: 9,  //结束重置
     notifyUI: function (action, context) {
         console.log("action：" + action);
     }
@@ -97,6 +104,7 @@ vcp.options = {
     "FPS": 60, //帧速率，目前无效
     "UI": new vcpUI(), //默认UI处理对象
     'url': '',//数据源
+    'volume': 50,
 };
 
 
@@ -212,6 +220,7 @@ vcppt.playing = function (time) {
         });
     } else {
         if (this.vcdpr.isEnd() && this.nowTp >= this.vcdpr.getDuration()) { //视频播放结束
+            this.onPause();
             this.notifyUI(this.UI.VIDEO_END);
             return;
         }
@@ -223,6 +232,7 @@ vcppt.playing = function (time) {
  */
 vcppt.onPause = function () {
     this.pause = true;
+    this.audio.pause();
     this.lastPauseTp = +new Date();
     this.notifyUI(this.UI.VIDEO_PAUSE);
 };
@@ -231,27 +241,57 @@ vcppt.onPause = function () {
  *  播放
  */
 vcppt.onPlay = function () {
-    if (!this.isLoaded()) return; //数据未加载完成或加载失败。
+    if (!this.isLoaded() || this.vcdpr.isEnd()) return; //数据未加载完成或加载失败,或者已经播放完毕
     this.pause = false;
     this.lastftp = this.lastPlayTp = +new Date();
     this.videoDuration = this.vcdpr.getDuration();
+    this.audio.play();
     this.playing(this.nowTp);
     this.notifyUI(this.UI.VIDEO_PLAY);
 };
 
 /**
- * 重置时间点
+ * 重置时间点（以秒计）
  *   从某一时间点继续播放
  * @param tp 0-100 总的时长百分比
  */
 vcppt.timePoint = function (tp) {
+    if (!this.isLoaded()) return; //数据未加载完成或加载失败
     if (typeof tp == 'number' && (tp >= 0 && tp <= 100)) {
-        this.nowTp = tp * this.vcdpr.getDuration() / 100;
+        this.nowTp = Math.floor(tp * this.vcdpr.getDuration() / 100000) * 1000;
         this.vcdpr.resetLastIndex(0);
         this.videoCanvas.clearCanvas();
+        this.audio.setCurTime(Math.floor(this.nowTp / 1000))
         this.notifyUI(this.UI.VIDEO_RESET);
     }
     util.log("timePoint:" + tp);
+};
+
+/**
+ * 初始音频
+ *
+ * @param s  音频地址
+ * @param i 是否忽略
+ */
+vcppt.initAudio = function (s, i) {
+    this.audio.setSrc(s);
+    this.audio.ignore(i ? i : false);
+    this.audio.setVolume(this.audioVolume / 100);
+};
+
+/**
+ * 设置音量
+ *
+ * @param v 0-100
+ */
+vcppt.setVolume = function (v) {
+    if (typeof v !== 'number') return;
+    this.audio.setVolume(v / 100);
+    this.notifyUI(this.UI.VIDEO_VOLUME);
+};
+
+vcppt.getVolume = function () {
+    this.audio.getVolume() * 100;
 };
 
 /**
@@ -260,19 +300,20 @@ vcppt.timePoint = function (tp) {
  * @param context
  */
 vcppt.notifyUI = function (action, context) {
+    if (action == this.UI.VIDEO_LOAD_DATA_SUCCESS && !this.isLoaded())  return;
     if (typeof this.UI.notifyUI == 'function') {
         if (typeof context == 'undefined') context = this;
         if (action == this.UI.VIDEO_LOAD_DATA_SUCCESS)   this.videoDuration = this.vcdpr.getDuration();
+
         this.UI.notifyUI(action, context)
     }
 };
 
 /**
- * 数据是否已成功
- * 加载完毕
+ * 主要数据是否已成功加载完
  */
 vcppt.isLoaded = function () {
-    return this.vcdpr.isReadied();
+    return this.vcdpr.isReadied() && this.audio.isReadied();
 };
 
 /**
@@ -358,7 +399,17 @@ vcdpr.prototype = {
             }
         }
 
+        //图片处理
         this.imgsLoad();
+
+        //音频处理
+        if (this.JsonData.audioUrl && (/(.mp3)|(.wav)|(.ogg)$/i).test(this.JsonData.audioUrl)) {
+            this.vcpObj.initAudio(this.JsonData.audioUrl);
+        } else {
+            this.vcpObj.initAudio('', true);//忽略音频处理
+        }
+
+
     },
 
     /**
@@ -366,7 +417,7 @@ vcdpr.prototype = {
      */
     imgsLoad: function () {
         var own = this;
-        if (this.imgCache.length <= 0) {
+        if (util.empty(this.imgCache)) {
             own.imgIsLoaded = true;
             own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
             return;
@@ -379,10 +430,14 @@ vcdpr.prototype = {
             imgID.onload = function () {
                 own.imgLoadedCount++;
                 imgID.loaded = true;
-                if (own.imgLoadedCount == own.imgCache.length) { //全部加载完毕
+                if (own.imgLoadedCount == util.len(own.imgCache)) { //全部加载完毕
                     own.imgIsLoaded = true;
                     own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
                 }
+            };
+            imgID.onerror = function () {
+                util.log('load picture fail');
+                own.toUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
             };
             this.imgCache[imgName] = imgID;
         }
@@ -423,6 +478,10 @@ vcdpr.prototype = {
 
     getScreen: function () {
         return this.JsonData.screenSize
+    },
+
+    hasImg: function () {
+        return this.imgCache.hasOwnProperty(imgName);
     },
 
     getImg: function (imgName) {
@@ -594,6 +653,87 @@ vcpt.drawImage = function (img, x, y, w, h) {
 
 vcpt.notice = function (vc) {
 };
+
+
+/**
+ * 音频处理
+ * @param h handler
+ */
+var pAudio = function (h) {
+
+    this.audio = document.createElement("audio");
+
+    this.vcpObj = h;
+
+    this.ignored = false; //是否忽视音频处理
+
+    own = this;
+
+    this.audio.addEventListener("canplaythrough", function () {
+            if (!own.flat)
+                own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
+            own.flat = true; //发送过加载完毕信息
+        }
+    );
+    this.audio.addEventListener("error", function () {
+            util.log('load audio fail');
+            own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
+        }
+    );
+};
+
+pAudio.prototype = {
+    /**
+     * 播放
+     * @param s 新的播放起点（单位：秒） 。如果未定义，则是继续上一次的播放点
+     */
+    play: function (s) {
+        if (this.ignored || !this.isReadied())
+            return;
+        if (s)
+            this.setCurTime(s);
+        this.audio.paused && this.audio.play && this.audio.play();
+    },
+    pause: function () {
+        !this.ignored && this.isReadied() && this.audio.pause && this.audio.pause();
+    },
+    ignore: function (b) {
+        if (typeof b == 'boolean')
+            this.ignored = b;
+        else
+            this.ignored = true;
+    },
+    setVolume: function (v) {
+        if (v > 0.0 && v < 1.0) {
+            this.audio.volume = v;
+        }
+    },
+    getVolume: function () {
+        return this.audio.volume;
+    },
+    setSrc: function (s) {
+        if (typeof s !== 'string' && !(/(.mp3)|(.wav)|(.ogg)$/i).test(s)) {
+            util.log('不支持此音频格式');
+            return;
+        }
+        this.audio.src = s;
+
+    },
+    isReadied: function () {
+        return this.ignored || this.audio.readyState == 4;
+    },
+    /**
+     * 设置音频中的当前播放位置（以秒计）。
+     * @param s
+     */
+    setCurTime: function (s) {
+        if (!this.ignored && typeof s === 'number' && this.audio.currentTime) {
+            this.audio.currentTime = s;
+        }
+    }
+
+};
+
 /**
  * 帧速率约为 60fps
  */
@@ -678,29 +818,7 @@ window.requestNextAnimationFrame =
     })
     ();
 
-/**
- * 音频处理
- */
-var pAudio = function () {
-    this.audio = document.createElement("audio");
-};
 
-pAudio.prototype = {
-    play: function () {
-
-    },
-    pause: function () {
-
-    },
-    setVolume: function (v) {
-        if (v > 0.0 && v < 1.0) {
-            this.audio.volume = v;
-        }
-    },
-    setSrc: function (s) {
-      this.audio.src=s;
-    }
-};
 
 
 

@@ -1,13 +1,29 @@
 {
   "responseNo": 0,
   "videoData": {
-    "imgPath": "http://",
+    "imgPath": "http://localhost:8800/tmp/01201512021514390014/fileRecv/",
+    "audioUrl": "http://localhost:8800/tmp/01201512021514390014/Audio.mp3",
     "screenSize": {
       "w": 150,
       "h": 100
     },
     "version": 0,
     "traceData": [
+      {
+        "timestamp": 500,
+        "data": [
+          {
+            "userType": 1,
+            "screenOffset": 0,
+            "action": 9,
+            "imgName": "01201512021516100015.jpg",
+            "PointX": 0,
+            "PointY": 0,
+            "mode": 1,
+            "screenIndex": 0
+          }
+        ]
+      },
       {
         "timestamp": 1000,
         "data": [
