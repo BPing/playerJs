@@ -96,6 +96,7 @@ vcp.options = {
 
     "FPS": 60, //帧速率，目前无效
     "UI": new vcpUI(), //默认UI处理对象
+
     'url': '',//数据源
 };
 
