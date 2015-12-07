@@ -24,6 +24,14 @@ function videoCanvasPlayer() {
     var volumeControlName = "volume-scrubber";
     var volumeProgressName = "volume-progress";
 
+    var message = {
+        load_sucess: '加载成功',
+        load_fail: '加载失败',
+        play: '播放',
+        pause: '暂停',
+        end: '完毕'
+    };
+
     $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
 
     var myUI = new VideoCanvasPlayerUI();
@@ -68,13 +76,13 @@ function videoCanvasPlayer() {
         if (act == myUI.VIDEO_LOAD_DATA_SUCCESS) {
             playPauseUI.hideDrawLoading();
             audioUI.setVolume(ctx.getVolume());
-            msgShow.show('加载完毕,请播放');
+            msgShow.show(message.load_sucess);
             timeShowUI.update(ctx.nowTp, ctx.videoDuration);
         }
 
         if (act == myUI.VIDEO_LOAD_DATA_FAILURE) {
             playPauseUI.hideDrawLoading();
-            msgShow.show('加载失败，请重试');
+            msgShow.show(message.load_fail);
             progressUI.lock();
             timeShowUI.lock();
         }
@@ -246,7 +254,7 @@ function videoCanvasPlayer() {
         showParseLoading: function () {
             var left = $("#" + drawContainerName).attr("width") / 2;
             var top = $("#" + drawContainerName).attr("height") / 2;
-            $("<img id='" + parseLoadingName + "' src='./resource/loading.gif' style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
+            $("<img id='" + parseLoadingName + "' src='../resource/loading.gif' style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
         },
 
         //隐藏loading
@@ -269,7 +277,7 @@ function videoCanvasPlayer() {
 
         //显示暂停消息
         showPauseMsg: function () {
-            msgShow.show("暂停");
+            msgShow.show(message.pause);
         },
 
         //隐藏暂停消息
@@ -279,7 +287,7 @@ function videoCanvasPlayer() {
 
         //显示完毕消息
         showOverMsg: function () {
-            msgShow.show("完毕")
+            msgShow.show(message.end)
         },
 
         //隐藏完毕消息
