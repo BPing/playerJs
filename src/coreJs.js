@@ -713,7 +713,7 @@ pAudio.prototype = {
     },
     setSrc: function (s) {
         if (typeof s !== 'string' && !(/(.mp3)|(.wav)|(.ogg)$/i).test(s)) {
-            util.log('不支持此音频格式');
+            util.log('This audio format is not supported ');
             return;
         }
         this.audio.src = s;

@@ -254,7 +254,7 @@ function videoCanvasPlayer() {
         showParseLoading: function () {
             var left = $("#" + drawContainerName).attr("width") / 2;
             var top = $("#" + drawContainerName).attr("height") / 2;
-            $("<img id='" + parseLoadingName + "' src='../resource/loading.gif' style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
+            $("<img id='" + parseLoadingName + "' src='../res/loading.gif' style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
         },
 
         //隐藏loading
