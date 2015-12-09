@@ -352,8 +352,8 @@ vcdpr.prototype = {
      * 保存在 vcdpr.JsonData 变量中
      */
     getJsonData: function () {
-        var own = this;
-        util.http.ajax({
+        var own = this, http = $.ajax ? $ : util.http;
+        http.ajax({
             type: 'get',
             url: this.Url,
             dataType: "json",
