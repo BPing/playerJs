@@ -91,10 +91,10 @@ vcpUI.prototype = {
 
 vcp.options = {
 
-    "vw": 600, //视口宽
-    "vh": 400, //视口高
-    "cw": 600, // canvas宽
-    "ch": 3200, // canvas高
+    "vw": 1080, //视口宽
+    "vh": 600, //视口高
+    "cw": 1080, // canvas宽
+    "ch": 600 * 8, // canvas高
 
     "lineWidth": 1, //线粗细
     "lineColor": 'red',
@@ -154,17 +154,17 @@ vcppt.playback = function (time) {
         util.each(drawdate, function (k, v) { //动作处理
 
             if (v.action == 0) {
-                this.videoCanvas.penDown(v.PointX * this.wr, v.PointY * this.hr);
+                this.videoCanvas.penDown(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 2) {
-                this.videoCanvas.penMove(v.PointX * this.wr, v.PointY * this.hr);
+                this.videoCanvas.penMove(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 1) {
-                this.videoCanvas.penUp(v.PointX * this.wr, v.PointY * this.hr);
+                this.videoCanvas.penUp(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
@@ -178,19 +178,22 @@ vcppt.playback = function (time) {
                 if (!(img instanceof Image)) return;
                 var x = 0, y = v.screenIndex * this.view.H;
 
-                if (v.mode == 0 || (img.width >= this.view.W && img.height >= this.view.H)) { //铺满全屏
+                if (v.mode == 0) { //铺满全屏
                     this.videoCanvas.drawImage(img, x, y, this.view.W, this.view.H);
                     return;
                 }
+                //图片宽和视口宽比，图片高和视口高比
+                var ivwr = img.width == 0 || this.view.W == 0 ? 0 : img.width / this.view.W,
+                    ivhr = img.height == 0 || this.view.H == 0 ? 0 : img.height / this.view.H;
 
                 //模式:按图片大小进行加载,最大一页(视口大小)
-                if (img.width >= this.view.W) { //宽超出页面宽度
+                if (img.width >= this.view.W && ivwr > ivhr) { //宽超出页面宽度
                     var w = this.view.W, h = img.height * (this.view.W / img.width);//比例缩放处理
                     this.videoCanvas.drawImage(img, x, y, w, h);
                     return;
                 }
 
-                if (img.height >= this.view.H) { //高超出页面高度
+                if (img.height >= this.view.H && (ivhr > ivwr)) { //高超出页面高度
                     var w = img.width * (this.view.H / img.height), h = this.view.H; //比例缩放处理
                     this.videoCanvas.drawImage(img, x, y, w, h);
                     return;
@@ -264,7 +267,7 @@ vcppt.timePoint = function (tp) {
         this.audio.setCurTime(Math.floor(this.nowTp / 1000))
         this.notifyUI(this.UI.VIDEO_RESET);
     }
-    util.log("timePoint:" + tp);
+    util.log("timepoint:" + tp);
 };
 
 /**
@@ -379,17 +382,26 @@ vcdpr.prototype = {
     preProcessor: function () {
 
         var traceData = this.JsonData.traceData;
-        var len = this.JsonData.traceData.length;
-        for (var ti = 0; ti < len; ti++) { //时间戳数据
+
+        for (var ti = 0; ti < this.JsonData.traceData.length; ti++) { //时间戳数据
+
+            traceData[ti].timestamp = Number(traceData[ti].timestamp);
+
             for (var dj = 0; dj < traceData[ti].data.length; dj++) {  //遍历每一条action数据
                 var action = traceData[ti].data[dj];
                 if (action.length <= 0) continue;
                 if (action.action in [0, 1, 2]) { //笔迹
+
+                    action.pointX = Number(action.pointX);
+                    action.pointY = Number(action.pointY);
+                    action.screenOffset = Number(action.screenOffset);
+
                     if (typeof action.screenOffset == 'undefined' || action.screenOffset == 0)  continue;
-                    action.PointY = action.PointY + (action.screenOffset / 100) * this.JsonData.screenSize.h;
+                    action.pointY = action.pointY + (action.screenOffset / 100) * parseInt(this.JsonData.screenSize.h);
                     continue;
                 }
                 if (action.action == 5) { //视图移动
+                    //var offset = action.screenOffset % 100;
                     continue;
                 }
                 if (action.action == 9) { //图片
@@ -469,11 +481,13 @@ vcdpr.prototype = {
 
         }
 
+        console.dir(data);
+
         return data;
     },
 
     getDuration: function () {
-        return this.JsonData.duration;
+        return Number(this.JsonData.duration);
     },
 
     getScreen: function () {
@@ -640,6 +654,10 @@ vcpt.penMove = function (x, y) {
 vcpt.viewMove = function (x, y, v) {
     if (v instanceof viewObj)
         v.moveTo(x, y);
+};
+
+vcpt.drawText = function (s, x, y) {
+    this.context.fillText(s, x, y);
 };
 
 vcpt.clearCanvas = function () {

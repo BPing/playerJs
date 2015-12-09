@@ -1,8 +1,8 @@
 {
   "responseNo": 0,
   "videoData": {
-    "imgPath": "http://localhost:8800/tmp/01201512021514390014/fileRecv/",
-    "audioUrl": "http://localhost:8800/tmp/01201512021514390014/Audio.mp3",
+    "imgPath": "http://127.0.0.2/tmp/01201512021514390014/fileRecv/",
+    "audioUrl": "http://127.0.0.2/tmp/01201512021514390014/Audio.mp3",
     "screenSize": {
       "w": 150,
       "h": 100
@@ -17,8 +17,8 @@
             "screenOffset": 0,
             "action": 9,
             "imgName": "01201512021516100015.jpg",
-            "PointX": 0,
-            "PointY": 0,
+            "pointX": 0,
+            "pointY": 0,
             "mode": 1,
             "screenIndex": 0
           }
@@ -37,8 +37,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 75,
-            "PointY": 60,
+            "pointX": 75,
+            "pointY": 60,
             "time": "",
             "pressure": 2
           },
@@ -52,8 +52,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 70,
-            "PointY": 60,
+            "pointX": 70,
+            "pointY": 60,
             "time": "",
             "pressure": 2
           },
@@ -67,8 +67,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 70,
-            "PointY": 65,
+            "pointX": 70,
+            "pointY": 65,
             "time": "",
             "pressure": 2
           },
@@ -82,8 +82,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 75,
-            "PointY": 65,
+            "pointX": 75,
+            "pointY": 65,
             "time": "",
             "pressure": 2
           }
@@ -112,8 +112,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 75,
-            "PointY": 90,
+            "pointX": 75,
+            "pointY": 90,
             "time": "",
             "pressure": 2
           }
@@ -132,8 +132,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 70,
-            "PointY": 90,
+            "pointX": 70,
+            "pointY": 90,
             "time": "",
             "pressure": 2
           }
@@ -152,8 +152,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 70,
-            "PointY": 95,
+            "pointX": 70,
+            "pointY": 95,
             "time": "",
             "pressure": 2
           }
@@ -172,8 +172,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 75,
-            "PointY": 95,
+            "pointX": 75,
+            "pointY": 95,
             "time": "",
             "pressure": 2
           }
@@ -192,8 +192,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 14,
-            "PointY": 15,
+            "pointX": 14,
+            "pointY": 15,
             "time": "",
             "pressure": 2
           }
@@ -212,8 +212,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 56,
-            "PointY": 0,
+            "pointX": 56,
+            "pointY": 0,
             "time": "",
             "pressure": 2
           }
@@ -232,8 +232,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 114,
-            "PointY": 30,
+            "pointX": 114,
+            "pointY": 30,
             "time": "",
             "pressure": 2
           }
@@ -252,8 +252,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 114,
-            "PointY": 30,
+            "pointX": 114,
+            "pointY": 30,
             "time": "",
             "pressure": 2
           }
@@ -272,8 +272,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 77,
-            "PointY": 12,
+            "pointX": 77,
+            "pointY": 12,
             "time": "",
             "pressure": 2
           }
@@ -292,8 +292,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 22,
-            "PointY": 25,
+            "pointX": 22,
+            "pointY": 25,
             "time": "",
             "pressure": 2
           }
@@ -312,8 +312,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 45,
-            "PointY": 25,
+            "pointX": 45,
+            "pointY": 25,
             "time": "",
             "pressure": 2
           }
@@ -332,8 +332,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 77,
-            "PointY": 96,
+            "pointX": 77,
+            "pointY": 96,
             "time": "",
             "pressure": 2
           }
@@ -352,8 +352,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 77,
-            "PointY": 23,
+            "pointX": 77,
+            "pointY": 23,
             "time": "",
             "pressure": 2
           }
@@ -372,8 +372,8 @@
               "g": 124,
               "b": 124
             },
-            "PointX": 140,
-            "PointY": 25,
+            "pointX": 140,
+            "pointY": 25,
             "time": "",
             "pressure": 2
           }

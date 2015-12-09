@@ -7,10 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     -->
     <!--<script type="text/javascript" src="jquery-1.11.1.min.js"></script>-->
-    <script type="text/javascript" src="player-0.9.min.js"></script>
-    <!--<script type="text/javascript" src="coreJs.js"></script>-->
-    <!--<script type="text/javascript" src="utilJs.js"></script>-->
-    <!--<script type="text/javascript" src="playJs.js"></script>-->
+    <!--<script type="text/javascript" src="player-0.9.min.js"></script>-->
+    <script type="text/javascript" src="./src/coreJs.js"></script>
+    <script type="text/javascript" src="./src/utilJs.js"></script>
+    <script type="text/javascript" src="./src/playJs.js"></script>
 </header>
 <link rel="stylesheet" href="css/index.css"/>
 <body>
@@ -58,8 +58,10 @@
 
 
 <script type="application/javascript">
+
     $(document).ready(function () {
-        videoCanvasPlayer();
+        videoUI.handler(util.strToObj(location.search.split('?')[1]));
+        console.dir(window.location);
     })
 </script>
 

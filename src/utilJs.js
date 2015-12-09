@@ -49,12 +49,68 @@ util.each = function (obj, fn, context) {
 };
 
 /**
+ * 遍历对象，把对象的属性和属性值连在一串字符
+ *
+ *     input: o={
+ *        a:1,
+ *        b:2,
+ *        c:3
+ *     }
+ *     output: a=1&b=2&c=3
+ *
+ * @param obj object
+ * @return {string}  as: a=1&b=2&c=3
+ */
+util.objToStr = function (obj) {
+    var str = [];
+    if (typeof obj === 'object') {
+        for (var k in obj) {
+            str.push(k + "=" + encodeURIComponent(obj[k]));
+        }
+    }
+    return str.join("&");
+};
+/**
+ * 把字符串转化成对象
+ *     input: a=1&b=2&c=3
+ *     output: o={
+ *        a:1,
+ *        b:2,
+ *        c:3
+ *     }
+ * @see  util.objToStr 的逆反过程
+ * @param str
+ */
+util.strToObj = function (str) {
+    var obj = {};
+    if (typeof str === 'string') {
+        var arr = str.split("&");
+        for (var key in arr) {
+            var prop = arr[key].split("=");
+            obj[prop[0]] = decodeURIComponent(prop[1]);
+        }
+    }
+    return obj;
+};
+
+/**
  * debug 日志
  *
  * @param {string} msg
  */
 util.log = function (msg) {
     util.logOn && console && console.log(msg);
+    //if(window.console){
+    //    window.console.log(Array.prototype.slice.call(arguments));
+    //}
+};
+
+/**
+ * 错误输出
+ * @param msg
+ */
+util.error = function (msg) {
+    console && console.error(msg);
 };
 
 /**
@@ -292,9 +348,9 @@ util.ele.prototype = {
     }
     , append: function (s) {
         var div = doc.createElement("div");
-        div.innerHTML = this.s;
+        div.innerHTML = s;
         var a = div.firstChild;
-        var e = doc.querySelector(s);
+        var e = this.e;
         a && e && e.appendChild(a);
     },
     ready: function (fn) {

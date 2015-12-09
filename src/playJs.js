@@ -1,8 +1,65 @@
 /**
- *
- * @param $
+ *options = {
+*    "vw": 600, //视口宽
+*    "vh": 400, //视口高
+*    "cw": 600, // canvas宽
+*    "ch": 3200, // canvas高
+*     "url":''
+*    'volume': 50,
+*  };
  */
-function videoCanvasPlayer() {
+var videoUI = function () {
+};
+
+/**
+ * 启动
+ */
+videoUI.startup = function (o) {
+
+    if (!$("#videoWin").is("div")) {
+        var videoUrl = 'video.html?' + util.objToStr(o);
+        $('body').append("<div id='videoShade'><a href='javascript:void(0);' id='videoClose'>关闭</a></div>");
+        $('body').append("<div id='videoWin'><iframe width='100%' height='100%' scrolling='no' frameborder=0  src='" + videoUrl + "' ></iframe></div>");
+        //设置遮罩样式
+        $("#videoShade").css({
+            position: "absolute",
+            "background-color": "black",
+            opacity: '0.5',
+            width: $(window).width(),
+            height: $(window).height(),
+            "z-index": 10,
+            top: 0
+        });
+        //设置close样式
+        $("#videoClose").css({position: "absolute", "right": "20px", "top": "10px", "color": "white"});
+        //设置videoWin 样式
+        var width = $(window).width() * 0.8;
+        var height = (width * 768) / 1280;
+        var left = ($(window).width() - width) / 2;
+        var top = ($(window).height() - height) / 2;
+        $("#videoWin").css({
+            left: left,
+            top: top,
+            width: width,
+            height: height,
+            "z-index": 11,
+            position: "absolute"
+        });
+        //
+        $("#videoClose").click(function () {
+            $("#videoWin").remove();
+            $("#videoShade").remove();
+        });
+    }
+};
+
+videoUI.options = {};
+
+videoUI.handler = function (options) {
+
+    options = util.mergeOptions(VideoCanvasPlayer.options, util.mergeOptions(videoUI.options, options));
+    if (options.url == '')
+        options.url = './demo.json';
 
     var drawContainerName = "drawContainer";
     var canvasContainerName = "canvasDiv";
@@ -24,6 +81,7 @@ function videoCanvasPlayer() {
     var volumeControlName = "volume-scrubber";
     var volumeProgressName = "volume-progress";
 
+    var loadPath = 'res/loading.gif';
     var message = {
         load_sucess: '加载成功',
         load_fail: '加载失败',
@@ -33,9 +91,13 @@ function videoCanvasPlayer() {
     };
 
     $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
+    $('#' + mainContainerName).css({width: options.vw, height: options.vh + 64});
+    $('#' + drawContainerName).css({width: options.vw, height: options.vh});
+    $('#' + playerName).css({width: options.vw + 2, top: options.vh});
 
     var myUI = new VideoCanvasPlayerUI();
-    var myPlayer = new VideoCanvasPlayer({cw: 1080, ch: 600 * 8, vw: 1080, vh: 600, UI: myUI, url: './demo.json'});
+    options.UI = myUI;
+    var myPlayer = new VideoCanvasPlayer(options);
 
     myUI.notifyUI = function (act, ctx) {
 
@@ -254,7 +316,7 @@ function videoCanvasPlayer() {
         showParseLoading: function () {
             var left = $("#" + drawContainerName).attr("width") / 2;
             var top = $("#" + drawContainerName).attr("height") / 2;
-            $("<img id='" + parseLoadingName + "' src='../res/loading.gif' style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
+            $("<img id='" + parseLoadingName + "' src=" + loadPath + " style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
         },
 
         //隐藏loading
