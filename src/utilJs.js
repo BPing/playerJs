@@ -10,6 +10,7 @@ var util = {};
 var hasOwnProp = Object.prototype.hasOwnProperty;
 
 util.logOn = true;
+
 /**
  * 合并对象 ，obj2会覆盖obj1已有的
  *
@@ -27,6 +28,53 @@ util.mergeOptions = function (obj1, obj2) {
         }
     }
     return obj1;
+};
+
+/**
+ *   合并2个对象，合并任何对象的属性
+ *   而不是只覆盖一。使用合并选项值
+ *   在更深的默认设置是很重要的。
+ * @param obj1
+ * @param obj2
+ * @returns {*}
+ */
+util.deepMerge = function (obj1, obj2) {
+    var key, val1, val2;
+    obj1 = util.copy(obj1);
+    for (key in obj2) {
+        if (hasOwnProp.call(obj2, key)) {
+            val1 = obj1[key];
+            val2 = obj2[key];
+            if (util.isPlain(val1) && util.isPlain(val2)) {
+                obj1[key] = util.deepMerge(val1, val2);
+            } else {
+                obj1[key] = obj2[key];
+            }
+        }
+    }
+    return obj1;
+};
+
+/**
+ * 复制对象（浅复制）
+ *
+ * @param obj
+ * @returns {*}
+ */
+util.copy = function (obj) {
+    return util.mergeOptions({}, obj);
+};
+
+/**
+ *  检查一个对象是否简单对象，而不是一个DOM节点或任何对象的子实例
+ * @param obj
+ * @returns {boolean}
+ */
+util.isPlain = function (obj) {
+    return !!obj
+        && typeof obj === 'object'
+        && obj.toString() === '[object Object]'
+        && obj.constructor === Object;
 };
 
 /**

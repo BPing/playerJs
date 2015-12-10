@@ -1,8 +1,8 @@
 {
   "responseNo": 0,
   "videoData": {
-    "imgPath": "http://127.0.0.2/tmp/01201512021514390014/fileRecv/",
-    "audioUrl": "http://127.0.0.2/tmp/01201512021514390014/Audio.mp3",
+    "imgPath": "./res/",
+    "audioUrl": "./res/Audio.mp3",
     "screenSize": {
       "w": 150,
       "h": 100

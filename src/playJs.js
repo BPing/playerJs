@@ -16,22 +16,41 @@ var videoUI = function () {
  */
 videoUI.startup = function (o) {
 
+    var closePngPath = "res/close.png";
+
     if (!$("#videoWin").is("div")) {
         var videoUrl = 'video.html?' + util.objToStr(o);
-        $('body').append("<div id='videoShade'><a href='javascript:void(0);' id='videoClose'>关闭</a></div>");
+        $('body').append("<div id='videoShade'><a href='javascript:void(0);' id='videoClose'><img id='closePng'src='" + closePngPath + "'  width='40px' height='40px' />Close</a></div>");
         $('body').append("<div id='videoWin'><iframe width='100%' height='100%' scrolling='no' frameborder=0  src='" + videoUrl + "' ></iframe></div>");
         //设置遮罩样式
         $("#videoShade").css({
             position: "absolute",
             "background-color": "black",
-            opacity: '0.5',
+            opacity: '0.6',
             width: $(window).width(),
             height: $(window).height(),
             "z-index": 10,
             top: 0
         });
         //设置close样式
-        $("#videoClose").css({position: "absolute", "right": "20px", "top": "10px", "color": "white"});
+        $("#videoClose").css({position: "absolute", "right": "20px", "top": "10px", "color": "white", "z-index": 15});
+
+        //设置close hover样式
+        var closeCss = document.getElementById('videoClose');
+        var closePng = document.getElementById('closePng');
+        closeCss.onmouseover = function () {
+            closeCss.style.color = "yellow";
+            closePng.style['z-index'] = "100";
+            closePng.style.width = "45px";
+            closePng.style.height = "45px";
+        };
+        closeCss.onmouseout = function () {
+            closeCss.style.color = "white";
+            closePng.style['z-index'] = "15";
+            closePng.style.width = "40px";
+            closePng.style.height = "40px";
+        };
+
         //设置videoWin 样式
         var width = $(window).width() * 0.8;
         var height = (width * 768) / 1280;
@@ -83,11 +102,11 @@ videoUI.handler = function (options) {
 
     var loadPath = 'res/loading.gif';
     var message = {
-        load_sucess: '加载成功',
-        load_fail: '加载失败',
-        play: '播放',
-        pause: '暂停',
-        end: '完毕'
+        load_success: 'Loading Success',
+        load_fail: 'Loading Failure',
+        play: 'Play',
+        pause: 'Pause',
+        end: 'The End'
     };
 
     $("<canvas id='canvas' style='z-index:3000;'></canvas>").prependTo("#" + canvasContainerName);
@@ -138,7 +157,7 @@ videoUI.handler = function (options) {
         if (act == myUI.VIDEO_LOAD_DATA_SUCCESS) {
             playPauseUI.hideDrawLoading();
             audioUI.setVolume(ctx.getVolume());
-            msgShow.show(message.load_sucess);
+            msgShow.show(message.load_success);
             timeShowUI.update(ctx.nowTp, ctx.videoDuration);
         }
 

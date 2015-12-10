@@ -2,8 +2,6 @@
 // Player core code
 // @author cbping
 //
-
-
 /**
  * VideoCanvasPlayer
  *
@@ -17,15 +15,15 @@
 var vcp = function (o) {
 
     if (typeof o === 'object')
-        vcp.options = util.mergeOptions(vcp.options, o);
+        o = util.mergeOptions(util.copy(vcp.options), o);
 
     //用于显示的canvas元素
-    this.playCanvas = document.getElementById(vcp.options.cID);
+    this.playCanvas = document.getElementById(o.cID);
     this.playContext = this.playCanvas.getContext('2d');
-    this.playCanvas.width = vcp.options.vw;
-    this.playCanvas.height = vcp.options.vh;
+    this.playCanvas.width = o.vw;
+    this.playCanvas.height = o.vh;
 
-    this.videoCanvas = new vc(vcp.options);
+    this.videoCanvas = new vc(o);
     this.view = this.videoCanvas.getView(0, 0); //获取视口实例
 
     this.pause = true; //是否暂停
@@ -40,16 +38,16 @@ var vcp = function (o) {
     this.hr = 0;
 
     //UI处理对象 vcpUI对象实例
-    if (vcp.options.UI instanceof vcpUI) {
-        this.UI = vcp.options.UI;
+    if (o.UI instanceof vcpUI) {
+        this.UI = o.UI;
     }
     //数据处理器
     this.vcdpr = new vcdpr();
-    this.vcdpr.Url = vcp.options.url;
+    this.vcdpr.Url = o.url;
     this.vcdpr.vcpObj = this;
 
     this.audio = new pAudio(this);
-    this.setVolume(vcp.options.volume);
+    this.setVolume(o.volume);
 };
 
 /**
@@ -150,7 +148,6 @@ vcppt.playback = function (time) {
 
         this.wr = this.view.W / s.w;
         this.hr = this.view.H / s.h;
-
         util.each(drawdate, function (k, v) { //动作处理
 
             if (v.action == 0) {
@@ -170,6 +167,9 @@ vcppt.playback = function (time) {
 
             if (v.action == 5) { //视图移动
                 this.videoCanvas.viewMove(0, v.screenOffset / 100 * this.view.H, this.view);
+                var pageLineH = Math.ceil(v.screenOffset / 100) * this.view.H;
+                this.videoCanvas.drawLine(0, pageLineH - 2, this.view.W, pageLineH - 10);
+                this.videoCanvas.drawText(Math.ceil(v.screenOffset / 100) + "p", this.view.W - 50, pageLineH);
                 return;
             }
 
@@ -411,17 +411,15 @@ vcdpr.prototype = {
             }
         }
 
-        //图片处理
-        this.imgsLoad();
-
         //音频处理
-        if (this.JsonData.audioUrl && (/(.mp3)|(.wav)|(.ogg)$/i).test(this.JsonData.audioUrl)) {
+        if (this.JsonData.audioUrl && (/(.mp3)|(.wav)|(.ogg)|(.amr)$/i).test(this.JsonData.audioUrl)) {
             this.vcpObj.initAudio(this.JsonData.audioUrl);
         } else {
             this.vcpObj.initAudio('', true);//忽略音频处理
         }
 
-
+        //图片处理
+        this.imgsLoad();
     },
 
     /**
@@ -585,15 +583,19 @@ var viewObj = function (x, y, w, h, ctx) {
  */
 var vc = function (o) {
     if (typeof o === 'object')
-        vc.options = util.mergeOptions(vc.options, o);
+        o = util.mergeOptions(util.copy(vc.options), o);
 
     this.canvas = document.createElement('canvas');
-    this.canvas.width = vc.options.cw;
-    this.canvas.height = vc.options.ch;
+    this.canvas.width = o.cw;
+    this.canvas.height = o.ch;
+
+    this.width = this.canvas.width;
+    this.height = this.canvas.height;
 
     this.context = this.canvas.getContext('2d');
-    this.context.strokeStyle = vc.options.strokeStyle;
-    this.context.lineWidth = vc.options.lineWidth;
+    this.context.strokeStyle = o.strokeStyle;
+    this.context.lineWidth = o.lineWidth;
+    this.context.font = o.font;
     this.drawingSurfaceImageData = null;
 };
 
@@ -610,8 +612,8 @@ vc.options = {
     "ch": 800, // canvas高
 
     // "strokeStyle": 'rgba(0,255,255,1)', //线风格 如：颜色
-    //"font": '',
-    // "fillStyle": '',
+    "font": '18pt Arial',
+    "fillStyle": 'red',
     "lineColor": 'red',
     "lineWidth": 1  //线粗细
 };
@@ -658,6 +660,13 @@ vcpt.viewMove = function (x, y, v) {
 
 vcpt.drawText = function (s, x, y) {
     this.context.fillText(s, x, y);
+};
+
+vcpt.drawLine = function (sx, sy, ex, ey) {
+    this.context.beginPath();
+    this.context.moveTo(sx, sy);
+    this.context.lineTo(ex, ey);
+    this.context.stroke();
 };
 
 vcpt.clearCanvas = function () {
@@ -730,7 +739,7 @@ pAudio.prototype = {
         return this.audio.volume;
     },
     setSrc: function (s) {
-        if (typeof s !== 'string' && !(/(.mp3)|(.wav)|(.ogg)$/i).test(s)) {
+        if (typeof s !== 'string' && !(/(.mp3)|(.wav)|(.ogg)|(.amr)$/i).test(s)) {
             util.log('This audio format is not supported ');
             return;
         }
