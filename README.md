@@ -5,7 +5,7 @@ canvas player
 
 ##<a name="index"/>目录
 * [项目目录](#project_dir)
-* [视频数据格式解说](#video_format)
+* [视频数据格式说明](#video_format)
 * [**](#**)
 
 
@@ -27,7 +27,7 @@ canvas player
       video.html        --> 播放器html
 
 
-##<a name="video_format"/>视频数据格式解说
+##<a name="video_format"/>视频数据格式说明
 
 [demo.json](https://github.com/BPing/playerJs/blob/dev/demo.json):
 ```
