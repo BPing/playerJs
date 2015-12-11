@@ -5,8 +5,8 @@ canvas player
 
 ##<a name="index"/>目录
 * [项目目录](#project_dir)
-* [视频数据格式说明](#video_format)
 * [使用](#video_use)
+* [视频数据格式说明](#video_format)
 * [**](#**)
 
 
