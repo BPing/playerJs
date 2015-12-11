@@ -23,6 +23,70 @@ canvas player
         utilJs.js        --> 通用工具类。
       demo.json         --> 视频数据示例
       example.tml       --> 例子
-      player-*.min.js   --> 源码压缩代码。所有js压缩，所以，使用时引用本文件即可
+      player-*.min.js   --> 源码压缩代码。所有js压缩，所以，使用时引用此文件即可
       video.html        --> 播放器html
+
+
+##<a name="index"/>视频数据格式解说
+
+[demo.json](https://github.com/BPing/playerJs/blob/dev/demo.json):
+```
+{
+  "responseNo": 0,  //返回码
+  
+  "videoData": {  //视频数据
+  
+    "imgPath": "./res/",  //图片根目录
+    
+    "audioUrl": "./res/Audio.mp3",  //音频地址
+    "screenSize": {  //屏幕尺寸
+      "w": 150,
+      "h": 100
+    },
+
+    "traceData": [  //帧数据
+      {
+        "timestamp": 500,  //时间戳
+        "data": [         //具体画图动作
+          {
+            "userType": 1,
+            "screenOffset": 0, // 屏幕偏移。以页面值为100，也是一个视口的高度。 具体偏移量= (screenOffset/100)*view.heigth
+            "action": 9,   //画图片动作
+            "imgName": "01201512021516100015.jpg", //图片名字。图片地址=imgPath+imgName
+            "pointX": 0,  //画图起点X
+            "pointY": 0,  //画图起点Y
+            "mode": 1,    //0：铺满一页，1：按图片大小缩放。Notice：无论哪种模式，图片至多显示在一个页面上
+            "screenIndex": 0 //页面偏移量，相对整个页面。假如screenIndex=1，则表示此图画在第二个页面，以此类推。
+            //**Notice**：一个视口的大小就是一个页面大小。
+          }
+        ]
+      },
+      {
+      timestamp": 1000, //时间戳
+        "data": [   //具体动作数据
+          {
+            "userType": 1,
+            "screenOffset": 0,
+            "action": 0,  //动作 0：按下画笔，2：画笔移动画线，1：移开画笔，停止画线
+            "pointX": 75,
+            "pointY": 60,
+          },
+          ]
+      }
+       {
+        "timestamp": 5500,
+        "data": [
+          {
+            "userType": 1,
+            "screenOffset": 0, //视口移动偏移量
+            "action": 5  //视口移动
+          }
+        ]
+      }
+     ]
+   }
+}
+```
+
+
 
