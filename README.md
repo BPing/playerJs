@@ -50,6 +50,8 @@ canvas player
 
 ##<a name="video_format"/>视频数据格式说明
 
+![code Coverage](https://github.com/BPing/playerJs/blob/dev/res/size.png?raw=true)
+
 >>    视频trace的格式定义:
 >>
 >>    第一行: 屏幕尺寸|trace版本
@@ -162,3 +164,4 @@ canvas player
    }
 }
 ```
+
