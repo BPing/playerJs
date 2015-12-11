@@ -9,7 +9,7 @@ canvas player
 * [**](#**)
 
 
-##<a name="index"/>项目目录
+##<a name="project_dir"/>项目目录
 
     playerJs/            --> 
       css/              --> css 文件
@@ -27,7 +27,7 @@ canvas player
       video.html        --> 播放器html
 
 
-##<a name="index"/>视频数据格式解说
+##<a name="video_format"/>视频数据格式解说
 
 [demo.json](https://github.com/BPing/playerJs/blob/dev/demo.json):
 ```
