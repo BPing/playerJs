@@ -30,7 +30,7 @@ canvas player
 ##<a name="video_format"/>视频数据格式说明
 
 [demo.json](https://github.com/BPing/playerJs/blob/dev/demo.json):
-```
+```json
 {
   "responseNo": 0,  //返回码
   
