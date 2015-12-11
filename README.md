@@ -62,23 +62,23 @@ canvas player
 >>
 >>单个条目详细解释如下:
 >>    
->>    timestamp 当前操作的偏移时间[与连接开始的时间偏移], 由服务器设置
+>>    `timestamp` 当前操作的偏移时间[与连接开始的时间偏移], 由服务器设置
 >>    
->>    userType 当前数据来源[0：老师|1：学生]
+>>    userType 当前数据来源
 >>    
->>    action Down(0)|Move(2)|Up(1)|Cancel(3)|SCREEN_JUMP(5)|Image(9) 其中括号内的是具体的值.
+>>    `action` Down(0)|Move(2)|Up(1)|Cancel(3)|SCREEN_JUMP(5)|Image(9) 其中括号内的是具体的值.
 >>
 >>    color(AARRGGBB) int 值,当前点的颜色
 >>    
->>    PointX 当前点的X值
+>>    `pointX` 当前点的X值
 >>    
->>    PointY 当前点的Y值
+>>    `pointY` 当前点的Y值
 >>    
 >>    time 当前事件发生的时间
 >>    
 >>    pressure 当前事件的压力.
 >>
->>    screenOffset 屏幕的偏移百分比, 相对于屏幕高度.[单屏高度为100]
+>>    `screenOffset` 屏幕的偏移百分比, 相对于屏幕高度.[单屏高度为100]
 >>    
 >>    Note:
 >>    
@@ -88,13 +88,13 @@ canvas player
 >>
 >>    当值为 [5] 时, 是表示对屏幕的移动操作. 后面的字段全部不存在.
 >>
->>    此时trace的格式为 timestamp|userType|screenOffset|action
+>>    此时trace的格式为 `timestamp`|userType|`screenOffset`|`action`
 >>    
 >>    当值为 [9] 时, 是表示加入图片. 后面的字段全部不存在, 如果不够则继续添加.
 >>
 >>    格式如下: 
 >>    
->>    图片名*PointX*pointY*模式*屏幕索引|图片名*PointX*pointY*模式*屏幕索引|图片名*PointX*pointY*模式*屏幕索引,
+>>    `图片名` * `pointX` * `pointY` * `模式mode` *  `屏幕索引screenIndex`|`图片名` * `pointX`  * `pointY` * `模式` * `屏幕索引`|`图片名` * `pointX` * `pointY` * `模式` * `屏幕索引`,
 >>    
 >>    图片的索引从1开始
 >>    
