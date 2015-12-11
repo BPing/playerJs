@@ -31,13 +31,7 @@ canvas player
 ##<a name="video_format"/>视频数据格式说明
 
 [demo.json](https://github.com/BPing/playerJs/blob/dev/demo.json):
-<<<<<<< HEAD
-
 ```json
-
-=======
-```json
->>>>>>> origin/dev
 {
   "responseNo": 0,  //返回码
   
@@ -100,5 +94,12 @@ canvas player
 ##<a name="video_user"/>使用
 
 ```javascript
+   
+   //html <script type="text/javascript" src="XXX/player-0.9.min.js"></script>
+
+    videoUI.startup({
+                  resUrl: '../public/js/playerjs/',
+                  url: '',
+              });
   
 ```
