@@ -91,7 +91,7 @@ canvas player
 }
 ```
 
-##<a name="video_user"/>使用
+##<a name="video_use"/>使用
 
 ```javascript
    
