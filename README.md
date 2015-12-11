@@ -31,9 +31,13 @@ canvas player
 ##<a name="video_format"/>视频数据格式说明
 
 [demo.json](https://github.com/BPing/playerJs/blob/dev/demo.json):
+<<<<<<< HEAD
 
 ```json
 
+=======
+```json
+>>>>>>> origin/dev
 {
   "responseNo": 0,  //返回码
   
@@ -65,7 +69,7 @@ canvas player
         ]
       },
       {
-      timestamp": 1000, //时间戳
+      "timestamp": 1000, //时间戳
         "data": [   //具体动作数据
           {
             "userType": 1,
