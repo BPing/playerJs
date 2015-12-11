@@ -28,7 +28,77 @@ canvas player
       video.html        --> 播放器html  (*必须)
 
 
+##<a name="video_use"/>使用
+
+```javascript
+   
+   //html <script type="text/javascript" src="XXX/player-0.9.min.js"></script>
+
+    videoUI.startup({
+                  root: '../',  //此插件根目录
+                  url: '',  //视频数据来源
+                  volume: 50, //默认音量大小。0-100
+                  "vw": 600, //视口宽
+                  "vh": 400, //视口高
+                  "cw": 600, // 底层canvas宽
+                  "ch": 3200, // 底层canvas高
+              });
+  
+```
+
 ##<a name="video_format"/>视频数据格式说明
+
+>>    视频trace的格式定义:
+>>
+>>    第一行: 屏幕尺寸|trace版本
+>>    
+>>    最后一行: 整个视频的时长.[毫秒]
+>>    
+>>    回放 Trace 条目的定义...
+>>    
+>>   timestamp&(userType|screenOffset|action|color|pointX|pointY|time|pressure)
+>>    
+>>    &(userType|screenOffset|action|color|pointX|pointY|time|pressure)
+>>
+>>单个条目详细解释如下:
+>>    
+>>    timestamp 当前操作的偏移时间[与连接开始的时间偏移], 由服务器设置
+>>    
+>>    userType 当前数据来源[0：老师|1：学生]
+>>    
+>>    action Down(0)|Move(2)|Up(1)|Cancel(3)|SCREEN_JUMP(5)|Image(9) 其中括号内的是具体的值.
+>>
+>>    color(AARRGGBB) int 值,当前点的颜色
+>>    
+>>    PointX 当前点的X值
+>>    
+>>    PointY 当前点的Y值
+>>    
+>>    time 当前事件发生的时间
+>>    
+>>    pressure 当前事件的压力.
+>>
+>>    screenOffset 屏幕的偏移百分比, 相对于屏幕高度.[单屏高度为100]
+>>    
+>>    Note:
+>>    
+>>    关于 action 复用的定义如下.
+>>
+>>    当值为 [0,3] 时, 是正常的划线操作.
+>>
+>>    当值为 [5] 时, 是表示对屏幕的移动操作. 后面的字段全部不存在.
+>>
+>>    此时trace的格式为 timestamp|userType|screenOffset|action
+>>    
+>>    当值为 [9] 时, 是表示加入图片. 后面的字段全部不存在, 如果不够则继续添加.
+>>
+>>    格式如下: 
+>>    
+>>    图片名*PointX*pointY*模式*屏幕索引|图片名*PointX*pointY*模式*屏幕索引|图片名*PointX*pointY*模式*屏幕索引,
+>>    
+>>    图片的索引从1开始
+>>    
+>>    其中模式: [0: 铺满屏幕(最大一个页面)| 1: 按图片大小进行加载.(需根据屏幕比进行缩放)]
 
 [demo.json](https://github.com/BPing/playerJs/blob/dev/demo.json):
 ```json
@@ -89,22 +159,4 @@ canvas player
     //**Notice**："timestamp" 相对视频始点的偏移时间戳，单位：毫秒
    }
 }
-```
-
-##<a name="video_use"/>使用
-
-```javascript
-   
-   //html <script type="text/javascript" src="XXX/player-0.9.min.js"></script>
-
-    videoUI.startup({
-                  root: '../',  //此插件根目录
-                  url: '',  //视频数据来源
-                  volume: 50, //默认音量大小。0-100
-                  "vw": 600, //视口宽
-                  "vh": 400, //视口高
-                  "cw": 600, // 底层canvas宽
-                  "ch": 3200, // 底层canvas高
-              });
-  
 ```
