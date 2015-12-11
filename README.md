@@ -62,7 +62,7 @@ canvas player
         ]
       },
       {
-      timestamp": 1000, //时间戳
+      "timestamp": 1000, //时间戳
         "data": [   //具体动作数据
           {
             "userType": 1,
