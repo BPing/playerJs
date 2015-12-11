@@ -13,9 +13,9 @@ canvas player
 ##<a name="project_dir"/>项目目录
 
     playerJs/            --> 
-      css/              --> css 文件
+      css/              --> css 文件 (*必须)
         index.css         --> default stylesheet
-      res/              --> 资源文件，包括图片
+      res/              --> 资源文件，包括图片 (*必须)
         close.png        --> 
         loading.gif      --> 
       src/              --> 
@@ -24,8 +24,8 @@ canvas player
         utilJs.js        --> 通用工具类。
       demo.json         --> 视频数据示例
       example.tml       --> 例子
-      player-*.min.js   --> 源码压缩代码。所有js压缩，所以，使用时引用此文件即可
-      video.html        --> 播放器html
+      player-*.min.js   --> 源码压缩代码。所有js压缩，所以，使用时引用此文件即可 (*必须)
+      video.html        --> 播放器html  (*必须)
 
 
 ##<a name="video_format"/>视频数据格式说明
@@ -98,8 +98,13 @@ canvas player
    //html <script type="text/javascript" src="XXX/player-0.9.min.js"></script>
 
     videoUI.startup({
-                  resUrl: '../public/js/playerjs/',
-                  url: '',
+                  root: '../',  //此插件根目录
+                  url: '',  //视频数据来源
+                  volume: 50, //默认音量大小。0-100
+                  "vw": 600, //视口宽
+                  "vh": 400, //视口高
+                  "cw": 600, // 底层canvas宽
+                  "ch": 3200, // 底层canvas高
               });
   
 ```
