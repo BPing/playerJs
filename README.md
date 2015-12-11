@@ -23,7 +23,7 @@ canvas player
         playJs.js        --> ui控制代码。根据相应的动作更新页面和监控页面事件
         utilJs.js        --> 通用工具类。
       demo.json         --> 视频数据示例
-      example.tml       --> 例子
+      example.html       --> 例子
       player-*.min.js   --> 源码压缩代码。所有js压缩，所以，使用时引用此文件即可 (*必须)
       video.html        --> 播放器html  (*必须)
 
