@@ -15,7 +15,6 @@ var videoUI = function () {
  * 启动
  */
 videoUI.startup = function (o) {
-
     o.resUrl = o.resUrl ? o.resUrl : '';
     var closePngPath = o.resUrl + 'res/close.png';
 

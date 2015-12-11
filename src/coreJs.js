@@ -582,20 +582,21 @@ var viewObj = function (x, y, w, h, ctx) {
  * @param {object} O
  */
 var vc = function (o) {
+    this.op = {};
     if (typeof o === 'object')
-        o = util.mergeOptions(util.copy(vc.options), o);
+        this.op = util.mergeOptions(util.copy(vc.options), o);
 
     this.canvas = document.createElement('canvas');
-    this.canvas.width = o.cw;
-    this.canvas.height = o.ch;
+    this.canvas.width = this.op.cw;
+    this.canvas.height = this.op.ch;
 
     this.width = this.canvas.width;
     this.height = this.canvas.height;
 
     this.context = this.canvas.getContext('2d');
-   // this.context.strokeStyle = o.strokeStyle;
-    this.context.lineWidth = o.lineWidth;
-  //  this.context.font = o.font;
+    this.context.strokeStyle = this.op.strokeStyle;
+    this.context.lineWidth = this.op.lineWidth;
+    this.context.font = this.op.font;
     this.drawingSurfaceImageData = null;
 };
 
@@ -612,7 +613,7 @@ vc.options = {
     "ch": 800, // canvas高
 
     // "strokeStyle": 'rgba(0,255,255,1)', //线风格 如：颜色
-  //  "font": '18pt Arial',
+    "font": '18pt Arial',
     "fillStyle": 'red',
     "lineColor": 'red',
     "lineWidth": 1  //线粗细
@@ -632,8 +633,8 @@ vcpt.getView = function (x, y, w, h) {
     return new viewObj(
         x ? x : 0,
         y ? y : 0,
-        w ? w : vc.options.vw,
-        h ? h : vc.options.vh,
+        w ? w : this.op.vw,
+        h ? h : this.op.vh,
         this.context
     )
 };
