@@ -7,6 +7,7 @@ canvas player
 
 ##<a name="index"/>目录
 * [项目目录](#project_dir)
+* [兼容性](#project_compatibility)
 * [使用](#video_use)
 * [视频数据格式说明](#video_format)
 * [**](#**)
@@ -28,6 +29,13 @@ canvas player
       example.html       --> 例子
       player-*.min.js   --> 源码压缩代码。所有js压缩，所以，使用时引用此文件即可 (*必须)
       video.html        --> 播放器html  (*必须)
+
+
+##<a name="project_compatibility"/>兼容性
+
+> * 浏览器：IE9+ Edge12+ Chorme43+ firebox41+ Safari8+ Opera33+ <br>
+> * audio : mp3|wav  mp3 兼容性最好.<br>
+> * IE 不支持wav格式，但Edge支持。
 
 
 ##<a name="video_use"/>使用
