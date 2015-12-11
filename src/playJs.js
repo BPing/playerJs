@@ -16,10 +16,11 @@ var videoUI = function () {
  */
 videoUI.startup = function (o) {
 
-    var closePngPath = "res/close.png";
+    o.resUrl = o.resUrl ? o.resUrl : '';
+    var closePngPath = o.resUrl + 'res/close.png';
 
     if (!$("#videoWin").is("div")) {
-        var videoUrl = 'video.html?' + util.objToStr(o);
+        var videoUrl = o.resUrl + 'video.html?' + util.objToStr(o);
         $('body').append("<div id='videoShade'><a href='javascript:void(0);' id='videoClose'><img id='closePng'src='" + closePngPath + "'  width='40px' height='40px' />Close</a></div>");
         $('body').append("<div id='videoWin'><iframe width='100%' height='100%' scrolling='no' frameborder=0  src='" + videoUrl + "' ></iframe></div>");
         //设置遮罩样式
@@ -72,7 +73,9 @@ videoUI.startup = function (o) {
     }
 };
 
-videoUI.options = {};
+videoUI.options = {
+    "resUrl": '',
+};
 
 videoUI.handler = function (options) {
 

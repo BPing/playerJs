@@ -360,7 +360,7 @@ vcdpr.prototype = {
             success: function (d) {
                 if (typeof d != 'object')
                     d = JSON.parse(d);
-                if (d.hasOwnProperty('responseNo') && d.hasOwnProperty('videoData') && d.responseNo == 0) {
+                if (typeof d == 'object' && d.hasOwnProperty('responseNo') && d.hasOwnProperty('videoData') && d.responseNo == 0) {
                     own.JsonData = d.videoData;
                     own.preProcessor();
                     own.loadOk = true;
@@ -412,7 +412,7 @@ vcdpr.prototype = {
         }
 
         //音频处理
-        if (this.JsonData.audioUrl && (/(.mp3)|(.wav)|(.ogg)|(.amr)$/i).test(this.JsonData.audioUrl)) {
+        if (this.JsonData.audioUrl && (/(.mp3)|(.wav)|(.ogg)$/i).test(this.JsonData.audioUrl)) {
             this.vcpObj.initAudio(this.JsonData.audioUrl);
         } else {
             this.vcpObj.initAudio('', true);//忽略音频处理
@@ -593,9 +593,9 @@ var vc = function (o) {
     this.height = this.canvas.height;
 
     this.context = this.canvas.getContext('2d');
-    this.context.strokeStyle = o.strokeStyle;
+   // this.context.strokeStyle = o.strokeStyle;
     this.context.lineWidth = o.lineWidth;
-    this.context.font = o.font;
+  //  this.context.font = o.font;
     this.drawingSurfaceImageData = null;
 };
 
@@ -612,7 +612,7 @@ vc.options = {
     "ch": 800, // canvas高
 
     // "strokeStyle": 'rgba(0,255,255,1)', //线风格 如：颜色
-    "font": '18pt Arial',
+  //  "font": '18pt Arial',
     "fillStyle": 'red',
     "lineColor": 'red',
     "lineWidth": 1  //线粗细
@@ -696,17 +696,20 @@ var pAudio = function (h) {
 
     own = this;
 
-    this.audio.addEventListener("canplaythrough", function () {
-            if (!own.flat)
-                own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
-            own.flat = true; //发送过加载完毕信息
-        }
-    );
-    this.audio.addEventListener("error", function () {
-            util.log('load audio fail');
-            own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
-        }
-    );
+    var ele = new util.ele(this.audio, 'audio');
+
+    var canplaythrough = function () {
+        own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_SUCCESS);
+        ele.unbind('canplaythrough', canplaythrough);
+    };
+
+    var error = function () {
+        util.log('load audio fail');
+        own.vcpObj.notifyUI(own.vcpObj.UI.VIDEO_LOAD_DATA_FAILURE);
+    };
+
+    ele.bind("canplaythrough", canplaythrough);
+    ele.bind("error", error);
 };
 
 pAudio.prototype = {
@@ -739,7 +742,7 @@ pAudio.prototype = {
         return this.audio.volume;
     },
     setSrc: function (s) {
-        if (typeof s !== 'string' && !(/(.mp3)|(.wav)|(.ogg)|(.amr)$/i).test(s)) {
+        if (typeof s !== 'string' && !(/(.mp3)|(.wav)|(.ogg)$/i).test(s)) {
             util.log('This audio format is not supported ');
             return;
         }
