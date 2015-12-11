@@ -83,7 +83,9 @@ canvas player
           }
         ]
       }
-     ]
+     ],
+     "duration": 6000  //视频总时间长 单位：毫秒
+    //**Notice**："timestamp" 相对视频始点的偏移时间戳，单位：毫秒
    }
 }
 ```
