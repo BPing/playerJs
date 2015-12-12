@@ -33,7 +33,7 @@ canvas player
 
 ##<a name="project_compatibility"/>兼容性
 
-> * 浏览器：IE9+ Edge12+ Chorme43+ firebox41+ Safari8+ Opera33+ <br>
+> * 浏览器：IE9+  Edge12+  Chorme43+  firebox41+  Safari8+  Opera33+ <br>
 > * audio : mp3|wav  mp3 兼容性最好.<br>
 > * IE 不支持wav格式，但Edge支持。
 
