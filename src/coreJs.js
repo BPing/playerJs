@@ -150,30 +150,40 @@ vcppt.playback = function (time) {
         this.hr = this.view.H / s.h;
         util.each(drawdate, function (k, v) { //动作处理
 
+            if (!v.action) return;
+
             if (v.action == 0) {
-                this.videoCanvas.penDown(v.pointX * this.wr, v.pointY * this.hr);
+                if (!!v.pointX && !!v.pointY)
+                    this.videoCanvas.penDown(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 2) {
-                this.videoCanvas.penMove(v.pointX * this.wr, v.pointY * this.hr);
+                if (!!v.pointX && !!v.pointY)
+                    this.videoCanvas.penMove(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 1) {
-                this.videoCanvas.penUp(v.pointX * this.wr, v.pointY * this.hr);
+                if (!!v.pointX && !!v.pointY)
+                    this.videoCanvas.penUp(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 5) { //视图移动
-                this.videoCanvas.viewMove(0, v.screenOffset / 100 * this.view.H, this.view);
-                var pageLineH = Math.ceil(v.screenOffset / 100) * this.view.H;
-                this.videoCanvas.drawLine(0, pageLineH - 2, this.view.W, pageLineH - 10);
-                this.videoCanvas.drawText(Math.ceil(v.screenOffset / 100) + "p", this.view.W - 50, pageLineH);
+                if (!!v.screenOffset) {
+                    this.videoCanvas.viewMove(0, v.screenOffset / 100 * this.view.H, this.view);
+                    var pageLineH = Math.ceil(v.screenOffset / 100) * this.view.H;
+                    this.videoCanvas.drawLine(0, pageLineH - 2, this.view.W, pageLineH - 10);
+                    this.videoCanvas.drawText(Math.ceil(v.screenOffset / 100) + "p", this.view.W - 50, pageLineH);
+                }
                 return;
             }
 
             if (v.action == 9) { //图像
+
+                if (!v.imgName || !v.screenIndex) return;
+
                 var img = this.vcdpr.getImg(v.imgName);
                 if (!(img instanceof Image)) return;
                 var x = 0, y = v.screenIndex * this.view.H;
@@ -360,7 +370,9 @@ vcdpr.prototype = {
             success: function (d) {
                 if (typeof d != 'object')
                     d = JSON.parse(d);
-                if (typeof d == 'object' && d.hasOwnProperty('responseNo') && d.hasOwnProperty('videoData') && d.responseNo == 0) {
+                if (typeof d == 'object' && d.hasOwnProperty('responseNo') && d.responseNo == 0
+                    && d.hasOwnProperty('videoData')
+                    && d.videoData.hasOwnProperty('traceData') && d.videoData.traceData.length > 0) {
                     own.JsonData = d.videoData;
                     own.preProcessor();
                     own.loadOk = true;

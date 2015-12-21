@@ -105,8 +105,7 @@ videoUI.handler = function (options) {
     var volumeControlName = "volume-scrubber";
     var volumeProgressName = "volume-progress";
 
-    var loadPath = options.root
-    'res/loading.gif';
+    var loadPath ='res/loading.gif';
     var message = {
         load_success: 'Loading Success',
         load_fail: 'Loading Failure',
