@@ -4,9 +4,12 @@
 *    "vh": 400, //视口高
 *    "cw": 600, // canvas宽
 *    "ch": 3200, // canvas高
-*     "url":''
+*     "url":'',
 *    'volume': 50,
+*    'root':''
 *  };
+ *
+ *  @author cbping
  */
 var videoUI = function () {
 };
@@ -15,11 +18,11 @@ var videoUI = function () {
  * 启动
  */
 videoUI.startup = function (o) {
-    o.resUrl = o.resUrl ? o.resUrl : '';
-    var closePngPath = o.resUrl + 'res/close.png';
+    o.root = o.root ? o.root : '';
+    var closePngPath = o.root + 'res/close.png';
 
     if (!$("#videoWin").is("div")) {
-        var videoUrl = o.resUrl + 'video.html?' + util.objToStr(o);
+        var videoUrl = o.root + 'video.html?' + util.objToStr(o);
         $('body').append("<div id='videoShade'><a href='javascript:void(0);' id='videoClose'><img id='closePng'src='" + closePngPath + "'  width='40px' height='40px' />Close</a></div>");
         $('body').append("<div id='videoWin'><iframe width='100%' height='100%' scrolling='no' frameborder=0  src='" + videoUrl + "' ></iframe></div>");
         //设置遮罩样式
@@ -73,7 +76,7 @@ videoUI.startup = function (o) {
 };
 
 videoUI.options = {
-    "resUrl": '',
+    "root": '',
 };
 
 videoUI.handler = function (options) {
@@ -102,7 +105,7 @@ videoUI.handler = function (options) {
     var volumeControlName = "volume-scrubber";
     var volumeProgressName = "volume-progress";
 
-    var loadPath = 'res/loading.gif';
+    var loadPath ='res/loading.gif';
     var message = {
         load_success: 'Loading Success',
         load_fail: 'Loading Failure',
