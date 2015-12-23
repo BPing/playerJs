@@ -136,8 +136,6 @@ vcppt.playback = function (time) {
     do {
         if (this.pause) return false;
 
-        this.handletime(time);
-
         var drawdate = this.vcdpr.getTimestampFromJson(this.nowTp);
 
         if (drawdate === false && this.vcdpr.isEnd() && this.nowTp < this.vcdpr.getDuration()) break;
@@ -215,7 +213,6 @@ vcppt.playback = function (time) {
     } while (false);
 
     this.view.drawViewTo(this.playContext);
-    this.notifyUI(this.UI.VIDEO_FRAME);
     return true;
 };
 
@@ -227,17 +224,23 @@ vcppt.playback = function (time) {
 vcppt.playing = function (time) {
     time = +new Date();
     var vcpHandle = this;
-    if (vcpHandle.playback(time)) {
-        window.requestNextAnimationFrame(function (t) {
-            vcpHandle.playing(t)
-        });
-    } else {
-        if (this.vcdpr.isEnd() && this.nowTp >= this.vcdpr.getDuration()) { //视频播放结束
-            this.onPause();
-            this.notifyUI(this.UI.VIDEO_END);
-            return;
-        }
+
+    if (this.vcdpr.isEnd() && this.nowTp >= this.vcdpr.getDuration()) { //视频播放结束
+        this.onPause();
+        this.notifyUI(this.UI.VIDEO_END);
+        return;
     }
+
+    this.handletime(time);
+
+    if (!this.vcdpr.isEnd()) {  //存在画图数据
+        vcpHandle.playback(time);
+    }
+
+    window.requestNextAnimationFrame(function (t) {
+        vcpHandle.playing(t)
+    });
+    this.notifyUI(this.UI.VIDEO_FRAME); //一帧数据处理完毕
 };
 
 /**
@@ -254,7 +257,7 @@ vcppt.onPause = function () {
  *  播放
  */
 vcppt.onPlay = function () {
-    if (!this.isLoaded() || this.vcdpr.isEnd()) return; //数据未加载完成或加载失败,或者已经播放完毕
+    if (!this.isLoaded() || this.nowTp >= this.vcdpr.getDuration()) return; //数据未加载完成或加载失败,或者已经播放完毕
     this.pause = false;
     this.lastftp = this.lastPlayTp = +new Date();
     this.videoDuration = this.vcdpr.getDuration();
@@ -370,9 +373,12 @@ vcdpr.prototype = {
             success: function (d) {
                 if (typeof d != 'object')
                     d = JSON.parse(d);
-                if (typeof d == 'object' && d.hasOwnProperty('responseNo') && d.responseNo == 0
+                if (typeof d == 'object'
+                    && d.hasOwnProperty('responseNo') && d.responseNo == 0
                     && d.hasOwnProperty('videoData')
-                    && d.videoData.hasOwnProperty('traceData') && d.videoData.traceData.length > 0) {
+                    && d.videoData.hasOwnProperty('traceData')
+                    && d.videoData.hasOwnProperty('duration')
+                    && d.videoData.hasOwnProperty('screenSize')) {
                     own.JsonData = d.videoData;
                     own.preProcessor();
                     own.loadOk = true;
