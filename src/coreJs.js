@@ -225,6 +225,8 @@ vcppt.playing = function (time) {
     time = +new Date();
     var vcpHandle = this;
 
+    if (this.pause) return;
+
     if (this.vcdpr.isEnd() && this.nowTp >= this.vcdpr.getDuration()) { //视频播放结束
         this.onPause();
         this.notifyUI(this.UI.VIDEO_END);
