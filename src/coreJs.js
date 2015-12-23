@@ -136,8 +136,6 @@ vcppt.playback = function (time) {
     do {
         if (this.pause) return false;
 
-        this.handletime(time);
-
         var drawdate = this.vcdpr.getTimestampFromJson(this.nowTp);
 
         if (drawdate === false && this.vcdpr.isEnd() && this.nowTp < this.vcdpr.getDuration()) break;
@@ -150,30 +148,40 @@ vcppt.playback = function (time) {
         this.hr = this.view.H / s.h;
         util.each(drawdate, function (k, v) { //动作处理
 
+            if (!v.action) return;
+
             if (v.action == 0) {
-                this.videoCanvas.penDown(v.pointX * this.wr, v.pointY * this.hr);
+                if (!!v.pointX && !!v.pointY)
+                    this.videoCanvas.penDown(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 2) {
-                this.videoCanvas.penMove(v.pointX * this.wr, v.pointY * this.hr);
+                if (!!v.pointX && !!v.pointY)
+                    this.videoCanvas.penMove(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 1) {
-                this.videoCanvas.penUp(v.pointX * this.wr, v.pointY * this.hr);
+                if (!!v.pointX && !!v.pointY)
+                    this.videoCanvas.penUp(v.pointX * this.wr, v.pointY * this.hr);
                 return;
             }
 
             if (v.action == 5) { //视图移动
-                this.videoCanvas.viewMove(0, v.screenOffset / 100 * this.view.H, this.view);
-                var pageLineH = Math.ceil(v.screenOffset / 100) * this.view.H;
-                this.videoCanvas.drawLine(0, pageLineH - 2, this.view.W, pageLineH - 10);
-                this.videoCanvas.drawText(Math.ceil(v.screenOffset / 100) + "p", this.view.W - 50, pageLineH);
+                if (!!v.screenOffset) {
+                    this.videoCanvas.viewMove(0, v.screenOffset / 100 * this.view.H, this.view);
+                    var pageLineH = Math.ceil(v.screenOffset / 100) * this.view.H;
+                    this.videoCanvas.drawLine(0, pageLineH - 2, this.view.W, pageLineH - 10);
+                    this.videoCanvas.drawText(Math.ceil(v.screenOffset / 100) + "p", this.view.W - 50, pageLineH);
+                }
                 return;
             }
 
             if (v.action == 9) { //图像
+
+                if (!v.imgName || !v.screenIndex) return;
+
                 var img = this.vcdpr.getImg(v.imgName);
                 if (!(img instanceof Image)) return;
                 var x = 0, y = v.screenIndex * this.view.H;
@@ -205,7 +213,6 @@ vcppt.playback = function (time) {
     } while (false);
 
     this.view.drawViewTo(this.playContext);
-    this.notifyUI(this.UI.VIDEO_FRAME);
     return true;
 };
 
@@ -217,17 +224,23 @@ vcppt.playback = function (time) {
 vcppt.playing = function (time) {
     time = +new Date();
     var vcpHandle = this;
-    if (vcpHandle.playback(time)) {
-        window.requestNextAnimationFrame(function (t) {
-            vcpHandle.playing(t)
-        });
-    } else {
-        if (this.vcdpr.isEnd() && this.nowTp >= this.vcdpr.getDuration()) { //视频播放结束
-            this.onPause();
-            this.notifyUI(this.UI.VIDEO_END);
-            return;
-        }
+
+    if (this.vcdpr.isEnd() && this.nowTp >= this.vcdpr.getDuration()) { //视频播放结束
+        this.onPause();
+        this.notifyUI(this.UI.VIDEO_END);
+        return;
     }
+
+    this.handletime(time);
+
+    if (!this.vcdpr.isEnd()) {  //存在画图数据
+        vcpHandle.playback(time);
+    }
+
+    window.requestNextAnimationFrame(function (t) {
+        vcpHandle.playing(t)
+    });
+    this.notifyUI(this.UI.VIDEO_FRAME); //一帧数据处理完毕
 };
 
 /**
@@ -244,7 +257,7 @@ vcppt.onPause = function () {
  *  播放
  */
 vcppt.onPlay = function () {
-    if (!this.isLoaded() || this.vcdpr.isEnd()) return; //数据未加载完成或加载失败,或者已经播放完毕
+    if (!this.isLoaded() || this.nowTp >= this.vcdpr.getDuration()) return; //数据未加载完成或加载失败,或者已经播放完毕
     this.pause = false;
     this.lastftp = this.lastPlayTp = +new Date();
     this.videoDuration = this.vcdpr.getDuration();
@@ -360,7 +373,12 @@ vcdpr.prototype = {
             success: function (d) {
                 if (typeof d != 'object')
                     d = JSON.parse(d);
-                if (typeof d == 'object' && d.hasOwnProperty('responseNo') && d.hasOwnProperty('videoData') && d.responseNo == 0) {
+                if (typeof d == 'object'
+                    && d.hasOwnProperty('responseNo') && d.responseNo == 0
+                    && d.hasOwnProperty('videoData')
+                    && d.videoData.hasOwnProperty('traceData')
+                    && d.videoData.hasOwnProperty('duration')
+                    && d.videoData.hasOwnProperty('screenSize')) {
                     own.JsonData = d.videoData;
                     own.preProcessor();
                     own.loadOk = true;
