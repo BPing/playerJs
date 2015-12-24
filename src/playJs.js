@@ -25,8 +25,6 @@ videoUI.startup = function (o) {
         var videoUrl = o.root + 'video.html?' + util.objToStr(o);
         $('body').append("<div id='videoShade'><a href='javascript:void(0);' id='videoClose'><img id='closePng'src='" + closePngPath + "'  width='40px' height='40px' />Close</a></div>");
         $('body').append("<div id='videoWin'><iframe width='100%' height='100%' scrolling='no' frameborder=0  src='" + videoUrl + "' ></iframe></div>");
-
-        var scrollTop = $(window).scrollTop();
         //设置遮罩样式
         $("#videoShade").css({
             position: "absolute",
@@ -35,7 +33,7 @@ videoUI.startup = function (o) {
             width: $(window).width(),
             height: $(window).height(),
             "z-index": 10,
-            top: scrollTop
+            top: 0
         });
         //设置close样式
         $("#videoClose").css({position: "absolute", "right": "20px", "top": "10px", "color": "white", "z-index": 15});
@@ -63,7 +61,7 @@ videoUI.startup = function (o) {
         var top = ($(window).height() - height) / 2;
         $("#videoWin").css({
             left: left,
-            top: scrollTop + top,
+            top: top,
             width: width,
             height: height,
             "z-index": 11,
@@ -107,7 +105,7 @@ videoUI.handler = function (options) {
     var volumeControlName = "volume-scrubber";
     var volumeProgressName = "volume-progress";
 
-    var loadPath = 'res/loading.gif';
+    var loadPath ='res/loading.gif';
     var message = {
         load_success: 'Loading Success',
         load_fail: 'Loading Failure',
@@ -340,9 +338,9 @@ videoUI.handler = function (options) {
 
         //显示loading
         showParseLoading: function () {
-            var left = '50';
+            var left = $("#" + drawContainerName).attr("width") / 2;
             var top = $("#" + drawContainerName).attr("height") / 2;
-            $("<img id='" + parseLoadingName + "' src=" + loadPath + " style='position:absolute;z-index:110;left:" + left + "%;top:" + top + "px' />").insertAfter("#" + drawContainerName)
+            $("<img id='" + parseLoadingName + "' src=" + loadPath + " style='position:absolute;z-index:110;left:" + left + "px;top:" + top + "px' />").insertAfter("#" + drawContainerName);
         },
 
         //隐藏loading
