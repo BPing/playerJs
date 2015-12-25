@@ -48,3 +48,7 @@ Temporary Items
 
 #
 jquery-1.11.1.min.js
+
+#gulp
+node_modules
+build
